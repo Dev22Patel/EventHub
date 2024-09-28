@@ -6,7 +6,15 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
+import { AuthProvider } from './context/AuthContext';
 import ForgotPasswordPage from './components/ForgotPasswordPage';
+import CreateEventPage from './pages/CreateEventPage';
+import SponsorEventsPage from './pages/SponserEventPage';
+import Profile from './pages/ProfilePage';
+import ProfilePage from './pages/ProfilePage';
+import EnhancedSponsorsPage from './pages/SponsorsPage';
+import EventDetailsPage from './pages/EventsDetailsPage';
+import AuctionBiddingPage from './pages/AuctionBiddingPage';
 const theme = createTheme({
   palette: {
     mode: 'light',
@@ -41,20 +49,27 @@ const theme = createTheme({
 
 function App() {
   return (
+    <AuthProvider>
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
         <Header />
         <Routes>
-
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-
+          <Route path="/create-event" element={<CreateEventPage />} />
+          <Route path="/events" element={<SponsorEventsPage />} />
+          <Route path="/events/:eventId" element={<EventDetailsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/sponsors" element={<EnhancedSponsorsPage />} />
+          <Route path="/events/:eventId/auctions/:auctionId" element={<AuctionBiddingPage />} />
         </Routes>
+        <div className='h-2 w-2'></div>
         <Footer />
       </Router>
     </ThemeProvider>
+    </AuthProvider>
   );
 }
 
