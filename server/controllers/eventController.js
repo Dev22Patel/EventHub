@@ -1,32 +1,60 @@
 const Event = require('../models/eventModel');
-const EventHost = require('../models/eventHostModel');
+const Auction = require('../models/auctionModel');
+const User = require('../models/user-model');
 
-// Create a new Event
-exports.createEvent = async (req, res) => {
+   const uploadImage = async (file) => {
+     if (!file) return null;
+     // Implement your image upload logic here
+     // Return the image URL or path
+   };
+
+   const createAuctions = async (auctionsData, eventId) => {
+     const auctionPromises = auctionsData.map(async (auctionData) => {
+       const auction = new Auction({
+         ...auctionData,
+         event: eventId,
+       });
+       await auction.save();
+       return auction._id;
+     });
+     return Promise.all(auctionPromises);
+   };
+
+   exports.createEvent = async (req, res) => {
     try {
+      console.log('Received request body:', req.body);
+      console.log('Received files:', req.files);
+
       const { auctions, ...eventData } = req.body;
+      const host = req.body.host;
 
-      // Ensure auctions is an array
-      const processedAuctions = Array.isArray(auctions) ? auctions : [];
+      console.log('Host ID:', host);
 
-      const eventDataWithAuctions = {
+      if (!host) {
+        return res.status(400).json({ error: 'Host ID is required' });
+      }
+
+      const imagePath = await uploadImage(req.file);
+
+      const event = new Event({
         ...eventData,
-        auctions: processedAuctions.map(auction => ({
-          ...auction,
-          status: 'pending'
-        }))
-      };
+        image: imagePath,
+        host: host,
+      });
 
-      const event = new Event(eventDataWithAuctions);
       await event.save();
 
-      // Associate event with the event host
-      if (event.host) {
-        await EventHost.findByIdAndUpdate(event.host, { $push: { events: event._id } });
-      }
+      const parsedAuctions = JSON.parse(auctions);
+      const auctionIds = await createAuctions(parsedAuctions, event._id);
+
+      event.auctions = auctionIds;
+      await event.save();
+
+      await User.findByIdAndUpdate(host, { $push: { events: event._id } });
 
       res.status(201).json(event);
     } catch (error) {
+      console.error('Error in createEvent:', error);
       res.status(400).json({ error: error.message });
     }
   };

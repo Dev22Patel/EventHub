@@ -14,35 +14,64 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Paper
+  Paper,
+  IconButton
 } from '@mui/material';
 import {
   ChevronLeft,
   ChevronRight,
   Image as ImageIcon,
   AttachMoney,
-  AccessTime
+  AccessTime,
+  Add as AddIcon,
+  Delete as DeleteIcon
 } from '@mui/icons-material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+
 const CreateEventPage = () => {
   const [activeStep, setActiveStep] = useState(0);
-  const [eventName, setEventName] = useState('');
-  const [eventDescription, setEventDescription] = useState('');
-  const [eventType, setEventType] = useState('in-person');
-  const [eventLocation, setEventLocation] = useState('');
-  const [eventDate, setEventDate] = useState('');
-  const [auctionItemName, setAuctionItemName] = useState('');
-  const [auctionItemDescription, setAuctionItemDescription] = useState('');
-  const [startingBid, setStartingBid] = useState('');
-  const [bidIncrement, setBidIncrement] = useState('');
-  const [auctionDuration, setAuctionDuration] = useState('');
-  const [previewImage, setPreviewImage] = useState(null);
+  const [eventData, setEventData] = useState({
+    title: '',
+    description: '',
+    eventType: 'in-person',
+    location: '',
+    date: '',
+    image: null,
+  });
+  const [auctions, setAuctions] = useState([{
+    itemName: '',
+    itemDescription: '',
+    startingBid: '',
+    bidIncrement: '',
+    duration: '',
+  }]);
 
   const steps = ['Event Details', 'Event Image', 'Auction Details'];
-
   const navigate = useNavigate();
 
+  const handleEventChange = (e) => {
+    const { name, value } = e.target;
+    setEventData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleAuctionChange = (index, e) => {
+    const { name, value } = e.target;
+    const updatedAuctions = auctions.map((auction, i) =>
+      i === index ? { ...auction, [name]: value } : auction
+    );
+    setAuctions(updatedAuctions);
+  };
+
+  const handleAddAuction = () => {
+    setAuctions([...auctions, {
+      itemName: '',
+      itemDescription: '',
+      startingBid: '',
+      bidIncrement: '',
+      duration: '',
+    }]);
+  };
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
@@ -50,53 +79,141 @@ const CreateEventPage = () => {
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
+  const handleRemoveAuction = (index) => {
+    setAuctions(auctions.filter((_, i) => i !== index));
+  };
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewImage(reader.result);
+        setEventData(prev => ({ ...prev, image: reader.result }));
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = async (e) => {
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     const userId = localStorage.getItem('userId');
+
+//     // Create a new FormData object
+//     const formData = new FormData();
+
+//     // Append event data
+//     formData.append('title', eventData.title);
+//     formData.append('description', eventData.description);
+//     formData.append('eventType', eventData.eventType);
+//     if (eventData.eventType === 'in-person') {
+//       formData.append('location', eventData.location);
+//     }
+//     formData.append('date', new Date(eventData.date).toISOString());
+//     formData.append('host', userId);
+
+//     // Append image if it exists
+//     if (eventData.image) {
+//       // Assuming the image is stored as a data URL
+//       const blob = await fetch(eventData.image).then(r => r.blob());
+//       formData.append('image', blob, 'event-image.jpg');
+//     }
+
+//     // Format auction data
+//     const formattedAuctions = auctions.map(auction => ({
+//       itemName: auction.itemName,
+//       itemDescription: auction.itemDescription,
+//       startingBid: parseFloat(auction.startingBid),
+//       bidIncrement: parseFloat(auction.bidIncrement),
+//       duration: parseInt(auction.duration),
+//       status: 'pending',
+//       currentHighestBid: 0,
+//       bids: []
+//     }));
+
+//     // Append formatted auctions data
+//     formData.append('auctions', JSON.stringify(formattedAuctions));
+
+//     try {
+//       const response = await axios.post('http://localhost:3000/api/events/createEvent', formData, {
+//         headers: {
+//           'Content-Type': 'multipart/form-data',
+//         },
+//       });
+
+//       console.log('Event created successfully:', response.data);
+//       navigate('/events');
+//     } catch (error) {
+//       console.error('Error creating event:', error.response ? error.response.data : error.message);
+//     }
+//   };
+const handleSubmit = async (e) => {
     e.preventDefault();
-    const userId = localStorage.getItem('userId'); // Change this if you used a different key
-    const formData = {
-      title: eventName,
-      description: eventDescription,
-      eventType: eventType,
-      location: eventType === 'in-person' ? eventLocation : undefined,
-      date: new Date(eventDate).toISOString(),
-      image: previewImage,
-      host: userId, // Replace with actual host ID (e.g., from user session)
-      auctions: [
-        {
-          itemName: auctionItemName,
-          itemDescription: auctionItemDescription,
-          startingBid: parseFloat(startingBid),
-          bidIncrement: parseFloat(bidIncrement),
-          duration: parseInt(auctionDuration),
-        }
-      ],
-    };
+    const userId = localStorage.getItem('userId');
+
+    if (!userId) {
+      alert('You must be logged in to create an event.');
+      return;
+    }
+
+    const formData = new FormData();
+
+    // Append all event data
+    Object.keys(eventData).forEach(key => {
+      if (key === 'date') {
+        formData.append(key, new Date(eventData[key]).toISOString());
+      } else if (key === 'image') {
+        // Skip the image key, we'll handle it separately
+      } else {
+        formData.append(key, eventData[key]);
+      }
+    });
+
+    // Handle image separately
+    if (eventData.image) {
+      if (typeof eventData.image === 'string' && eventData.image.startsWith('data:')) {
+        const response = await fetch(eventData.image);
+        const blob = await response.blob();
+        formData.append('image', blob, 'event-image.jpg');
+      } else if (eventData.image instanceof File) {
+        formData.append('image', eventData.image, eventData.image.name);
+      }
+    }
+
+    // Append user ID as the event host
+    formData.append('host', userId);
+
+    // Format auctions and append them
+    const formattedAuctions = auctions.map(auction => ({
+      itemName: auction.itemName,
+      itemDescription: auction.itemDescription,
+      startingBid: parseFloat(auction.startingBid),
+      bidIncrement: parseFloat(auction.bidIncrement),
+      duration: parseInt(auction.duration),
+    }));
+
+    formData.append('auctions', JSON.stringify(formattedAuctions));
+
+    // Convert FormData to a plain object
+    const plainFormData = {};
+    for (let [key, value] of formData.entries()) {
+      plainFormData[key] = value;
+    }
 
     try {
-      console.log(formData);
-      const response = await axios.post('http://localhost:3000/api/events/createEvent', formData, {
+      const response = await axios.post('http://localhost:3000/api/events/createEvent', plainFormData, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
+
       console.log('Event created successfully:', response.data);
       navigate('/events');
     } catch (error) {
-      console.error('Error creating event:', error);
+      console.error('Error creating event:', error.response ? error.response.data : error.message);
+      alert('Failed to create event. Please check the console for more details.');
     }
   };
+  // ... (keep the handleNext and handleBack functions)
 
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
@@ -119,9 +236,10 @@ const CreateEventPage = () => {
                 <TextField
                   fullWidth
                   label="Event Name"
+                  name="title"
                   variant="outlined"
-                  value={eventName}
-                  onChange={(e) => setEventName(e.target.value)}
+                  value={eventData.title}
+                  onChange={handleEventChange}
                   required
                 />
               </Grid>
@@ -129,11 +247,12 @@ const CreateEventPage = () => {
                 <TextField
                   fullWidth
                   label="Event Description"
+                  name="description"
                   variant="outlined"
                   multiline
                   rows={4}
-                  value={eventDescription}
-                  onChange={(e) => setEventDescription(e.target.value)}
+                  value={eventData.description}
+                  onChange={handleEventChange}
                   required
                 />
               </Grid>
@@ -142,22 +261,24 @@ const CreateEventPage = () => {
                   <FormLabel component="legend">Event Type</FormLabel>
                   <RadioGroup
                     row
-                    value={eventType}
-                    onChange={(e) => setEventType(e.target.value)}
+                    name="eventType"
+                    value={eventData.eventType}
+                    onChange={handleEventChange}
                   >
                     <FormControlLabel value="in-person" control={<Radio />} label="In-person" />
                     <FormControlLabel value="virtual" control={<Radio />} label="Virtual" />
                   </RadioGroup>
                 </FormControl>
               </Grid>
-              {eventType === 'in-person' && (
+              {eventData.eventType === 'in-person' && (
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
                     label="Event Location"
+                    name="location"
                     variant="outlined"
-                    value={eventLocation}
-                    onChange={(e) => setEventLocation(e.target.value)}
+                    value={eventData.location}
+                    onChange={handleEventChange}
                     required
                   />
                 </Grid>
@@ -166,9 +287,10 @@ const CreateEventPage = () => {
                 <TextField
                   fullWidth
                   label="Event Date"
+                  name="date"
                   type="date"
-                  value={eventDate}
-                  onChange={(e) => setEventDate(e.target.value)}
+                  value={eventData.date}
+                  onChange={handleEventChange}
                   InputLabelProps={{
                     shrink: true,
                   }}
@@ -197,12 +319,12 @@ const CreateEventPage = () => {
                   Upload Event Image
                 </Button>
               </label>
-              {previewImage && (
+              {eventData.image && (
                 <Box
                   sx={{
                     width: '100%',
                     height: 300,
-                    backgroundImage: `url(${previewImage})`,
+                    backgroundImage: `url(${eventData.image})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     borderRadius: 1,
@@ -213,72 +335,97 @@ const CreateEventPage = () => {
           )}
 
           {activeStep === 2 && (
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Auction Item Name"
-                  variant="outlined"
-                  value={auctionItemName}
-                  onChange={(e) => setAuctionItemName(e.target.value)}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Item Description"
-                  variant="outlined"
-                  multiline
-                  rows={4}
-                  value={auctionItemDescription}
-                  onChange={(e) => setAuctionItemDescription(e.target.value)}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Starting Bid"
-                  variant="outlined"
-                  type="number"
-                  value={startingBid}
-                  onChange={(e) => setStartingBid(e.target.value)}
-                  InputProps={{
-                    startAdornment: <AttachMoney />,
-                  }}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Bid Increment"
-                  variant="outlined"
-                  type="number"
-                  value={bidIncrement}
-                  onChange={(e) => setBidIncrement(e.target.value)}
-                  InputProps={{
-                    startAdornment: <AttachMoney />,
-                  }}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Auction Duration (hours)"
-                  variant="outlined"
-                  type="number"
-                  value={auctionDuration}
-                  onChange={(e) => setAuctionDuration(e.target.value)}
-                  InputProps={{
-                    startAdornment: <AccessTime />,
-                  }}
-                  required
-                />
-              </Grid>
-            </Grid>
+            <>
+              {auctions.map((auction, index) => (
+                <Grid container spacing={3} key={index} sx={{ mb: 4 }}>
+                  <Grid item xs={12}>
+                    <Typography variant="h6">Auction Item {index + 1}</Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Auction Item Name"
+                      name="itemName"
+                      variant="outlined"
+                      value={auction.itemName}
+                      onChange={(e) => handleAuctionChange(index, e)}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Item Description"
+                      name="itemDescription"
+                      variant="outlined"
+                      multiline
+                      rows={4}
+                      value={auction.itemDescription}
+                      onChange={(e) => handleAuctionChange(index, e)}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Starting Bid"
+                      name="startingBid"
+                      variant="outlined"
+                      type="number"
+                      value={auction.startingBid}
+                      onChange={(e) => handleAuctionChange(index, e)}
+                      InputProps={{
+                        startAdornment: <AttachMoney />,
+                      }}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Bid Increment"
+                      name="bidIncrement"
+                      variant="outlined"
+                      type="number"
+                      value={auction.bidIncrement}
+                      onChange={(e) => handleAuctionChange(index, e)}
+                      InputProps={{
+                        startAdornment: <AttachMoney />,
+                      }}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Auction Duration (hours)"
+                      name="duration"
+                      variant="outlined"
+                      type="number"
+                      value={auction.duration}
+                      onChange={(e) => handleAuctionChange(index, e)}
+                      InputProps={{
+                        startAdornment: <AccessTime />,
+                      }}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <IconButton onClick={() => handleRemoveAuction(index)} color="error">
+                      <DeleteIcon />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              ))}
+              <Button
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={handleAddAuction}
+                sx={{ mt: 2 }}
+              >
+                Add Another Auction Item
+              </Button>
+            </>
           )}
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>

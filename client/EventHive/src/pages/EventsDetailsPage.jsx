@@ -7,34 +7,36 @@ import {
   Box,
   Button,
   Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
+  CircularProgress,
   List,
   ListItem,
   ListItemText,
   Divider,
-  CircularProgress
 } from '@mui/material';
-import { CalendarToday, LocationOn, Gavel, AttachMoney } from '@mui/icons-material';
+import { CalendarToday, LocationOn, Gavel } from '@mui/icons-material';
 
 const EventDetailsPage = () => {
   const [event, setEvent] = useState(null);
+  const [auctions, setAuctions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [openAuction, setOpenAuction] = useState(false);
-  const [selectedAuction, setSelectedAuction] = useState(null);
-  const [bidAmount, setBidAmount] = useState('');
-
   const { eventId } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/events/${eventId}`);
-        setEvent(response.data);
+        const eventResponse = await axios.get(`http://localhost:3000/api/events/${eventId}`);
+        setEvent(eventResponse.data);
+
+        // Fetch auction details using auction IDs
+        const auctionPromises = eventResponse.data.auctions.map((auctionId) =>
+          axios.get(`http://localhost:3000/api/auctions/${auctionId}`)
+        );
+        const auctionResponses = await Promise.all(auctionPromises);
+        const auctionData = auctionResponses.map((res) => res.data);
+        setAuctions(auctionData);
+
         setLoading(false);
       } catch (err) {
         setError('Failed to fetch event details. Please try again later.');
@@ -44,20 +46,6 @@ const EventDetailsPage = () => {
 
     fetchEvent();
   }, [eventId]);
-
-  const handleOpenAuction = (auction) => {
-    navigate(`/events/${eventId}/auctions/${auction._id}`);
-  };
-
-  const handleCloseAuction = () => {
-    setOpenAuction(false);
-    setSelectedAuction(null);
-  };
-
-  const handleBidSubmit = () => {
-    console.log(`Bid submitted for ${selectedAuction.itemName}: $${bidAmount}`);
-    handleCloseAuction();
-  };
 
   if (loading) {
     return (
@@ -109,7 +97,7 @@ const EventDetailsPage = () => {
         Available Auctions
       </Typography>
       <List>
-        {event.auctions.map((auction, index) => (
+        {auctions.map((auction, index) => (
           <React.Fragment key={auction._id}>
             {index > 0 && <Divider />}
             <ListItem>
@@ -120,7 +108,7 @@ const EventDetailsPage = () => {
               <Button
                 variant="outlined"
                 startIcon={<Gavel />}
-                onClick={() => handleOpenAuction(auction)}
+                onClick={() => navigate(`/events/${eventId}/auctions/${auction._id}`)}
               >
                 Bid Now
               </Button>
@@ -128,8 +116,6 @@ const EventDetailsPage = () => {
           </React.Fragment>
         ))}
       </List>
-
-      
     </Container>
   );
 };

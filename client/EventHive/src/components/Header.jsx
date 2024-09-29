@@ -23,12 +23,12 @@ export default function Header() {
         <nav>
           <Link to="/events" style={{ textDecoration: 'none' }}>
             <Button color="inherit" sx={{ my: 1, mx: 1.5, color: 'text.primary' }}>
-              Upcoming Events
+              Sponsor Events
             </Button>
           </Link>
           <Link to="/create-event" style={{ textDecoration: 'none' }}>
             <Button color="inherit" sx={{ my: 1, mx: 1.5, color: 'text.primary' }}>
-              For Hosts
+              Create Events
             </Button>
           </Link>
           <Link to="/sponsors" style={{ textDecoration: 'none' }}>

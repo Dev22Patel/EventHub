@@ -25,18 +25,21 @@ const AuctionBiddingPage = () => {
   const [bidAmount, setBidAmount] = useState('');
   const [timeLeft, setTimeLeft] = useState('');
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
-
-  const { eventId, auctionId } = useParams();
   const navigate = useNavigate();
+  const { eventId, auctionId } = useParams();
 
   useEffect(() => {
     const fetchAuction = async () => {
       try {
+        if (!eventId || !auctionId) {
+          throw new Error('Missing eventId or auctionId');
+        }
         const response = await axios.get(`http://localhost:3000/api/events/${eventId}/auctions/${auctionId}`);
         setAuction(response.data);
-        setLoading(false);
       } catch (err) {
-        setError('Failed to fetch auction details. Please try again later.');
+        console.error('Error fetching auction:', err);
+        setError(`Failed to fetch auction details: ${err.message}`);
+      } finally {
         setLoading(false);
       }
     };
@@ -48,8 +51,9 @@ const AuctionBiddingPage = () => {
     if (auction) {
       const timer = setInterval(() => {
         const now = new Date();
-        const end = new Date(auction.endTime);
-        const difference = end - now;
+        const durationInMs = auction.duration * 60 * 1000; // Convert duration to milliseconds
+        const end = new Date(auction.createdAt).getTime() + durationInMs; // Calculate end time
+        const difference = end - now.getTime();
 
         if (difference > 0) {
           const days = Math.floor(difference / (1000 * 60 * 60 * 24));
@@ -71,14 +75,12 @@ const AuctionBiddingPage = () => {
   const handleBidSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`http://localhost:3000/api/events/${eventId}/auctions/${auctionId}/bids`, {
-        amount: Number(bidAmount)
+      const response = await axios.post(`http://localhost:3000/api/events/${eventId}/auctions/${auctionId}/bids`, {
+        amount: Number(bidAmount),
       });
+      setAuction(response.data); // Update auction state with the new auction data
       setSnackbar({ open: true, message: 'Bid placed successfully!', severity: 'success' });
-      // Refresh auction data
-      const response = await axios.get(`http://localhost:3000/api/events/${eventId}/auctions/${auctionId}`);
-      setAuction(response.data);
-      setBidAmount('');
+      setBidAmount(''); // Reset bid amount
     } catch (err) {
       setSnackbar({ open: true, message: 'Failed to place bid. Please try again.', severity: 'error' });
     }
@@ -103,7 +105,15 @@ const AuctionBiddingPage = () => {
   if (!auction) {
     return null;
   }
-
+  const options = {
+    year: 'numeric',
+    month: 'long', // "long" for full month name, "short" for abbreviated
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZoneName: 'short' // Include time zone abbreviation
+};
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
       <Button startIcon={<ArrowBack />} onClick={() => navigate(-1)} sx={{ mb: 2 }}>
@@ -120,7 +130,7 @@ const AuctionBiddingPage = () => {
           </Typography>
         </Box>
         <Typography variant="body1" paragraph>
-          {auction.description}
+          {auction.itemDescription}
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Typography variant="h6">
@@ -147,7 +157,8 @@ const AuctionBiddingPage = () => {
               type="submit"
               variant="contained"
               startIcon={<Gavel />}
-              disabled={Number(bidAmount) <= auction.currentHighestBid}
+              disabled={Number(bidAmount) <= auction.currentHighestBid || Number(bidAmount) < auction.startingBid}
+              onClick={handleBidSubmit}
             >
               Place Bid
             </Button>
@@ -159,12 +170,12 @@ const AuctionBiddingPage = () => {
       </Typography>
       <List>
         {auction.bids.map((bid, index) => (
-          <React.Fragment key={bid.id}>
+          <React.Fragment key={index}>
             {index > 0 && <Divider />}
             <ListItem>
               <ListItemText
                 primary={`$${bid.amount}`}
-                secondary={`Bidder: ${bid.bidder} - ${new Date(bid.timestamp).toLocaleString()}`}
+                secondary={`Bidding Time: ${Date(bid.timestamp).toLocaleString('en-US', options)}`}
               />
             </ListItem>
           </React.Fragment>

@@ -30,3 +30,4 @@ app.use('/api/events', eventRoutes);
 app.use('/api/auctions', auctionRoutes);
 app.use('/api/sponsors', sponsorRoutes);
 app.use('/api/auth',authrouter);
+app.use('/api', auctionRoutes);
