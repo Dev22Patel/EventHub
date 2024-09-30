@@ -36,7 +36,6 @@ const EventDetailsPage = () => {
         const auctionResponses = await Promise.all(auctionPromises);
         const auctionData = auctionResponses.map((res) => res.data);
         setAuctions(auctionData);
-
         setLoading(false);
       } catch (err) {
         setError('Failed to fetch event details. Please try again later.');

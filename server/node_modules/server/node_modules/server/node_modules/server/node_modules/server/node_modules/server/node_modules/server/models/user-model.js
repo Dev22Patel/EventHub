@@ -48,7 +48,7 @@ userSchema.methods.generateToken = function () {
         },
         "thisismyseceratekey",
         {
-            expiresIn: "30d",
+            expiresIn: "1d",
         }
     );
     }  catch (error) {

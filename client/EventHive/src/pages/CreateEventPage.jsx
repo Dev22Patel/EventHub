@@ -94,62 +94,10 @@ const CreateEventPage = () => {
     }
   };
 
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     const userId = localStorage.getItem('userId');
-
-//     // Create a new FormData object
-//     const formData = new FormData();
-
-//     // Append event data
-//     formData.append('title', eventData.title);
-//     formData.append('description', eventData.description);
-//     formData.append('eventType', eventData.eventType);
-//     if (eventData.eventType === 'in-person') {
-//       formData.append('location', eventData.location);
-//     }
-//     formData.append('date', new Date(eventData.date).toISOString());
-//     formData.append('host', userId);
-
-//     // Append image if it exists
-//     if (eventData.image) {
-//       // Assuming the image is stored as a data URL
-//       const blob = await fetch(eventData.image).then(r => r.blob());
-//       formData.append('image', blob, 'event-image.jpg');
-//     }
-
-//     // Format auction data
-//     const formattedAuctions = auctions.map(auction => ({
-//       itemName: auction.itemName,
-//       itemDescription: auction.itemDescription,
-//       startingBid: parseFloat(auction.startingBid),
-//       bidIncrement: parseFloat(auction.bidIncrement),
-//       duration: parseInt(auction.duration),
-//       status: 'pending',
-//       currentHighestBid: 0,
-//       bids: []
-//     }));
-
-//     // Append formatted auctions data
-//     formData.append('auctions', JSON.stringify(formattedAuctions));
-
-//     try {
-//       const response = await axios.post('http://localhost:3000/api/events/createEvent', formData, {
-//         headers: {
-//           'Content-Type': 'multipart/form-data',
-//         },
-//       });
-
-//       console.log('Event created successfully:', response.data);
-//       navigate('/events');
-//     } catch (error) {
-//       console.error('Error creating event:', error.response ? error.response.data : error.message);
-//     }
-//   };
 const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem('userId');
-
+    console.log(userId);
     if (!userId) {
       alert('You must be logged in to create an event.');
       return;
@@ -169,14 +117,8 @@ const handleSubmit = async (e) => {
     });
 
     // Handle image separately
-    if (eventData.image) {
-      if (typeof eventData.image === 'string' && eventData.image.startsWith('data:')) {
-        const response = await fetch(eventData.image);
-        const blob = await response.blob();
-        formData.append('image', blob, 'event-image.jpg');
-      } else if (eventData.image instanceof File) {
+    if (eventData.image && eventData.image instanceof File) {
         formData.append('image', eventData.image, eventData.image.name);
-      }
     }
 
     // Append user ID as the event host
@@ -193,16 +135,15 @@ const handleSubmit = async (e) => {
 
     formData.append('auctions', JSON.stringify(formattedAuctions));
 
-    // Convert FormData to a plain object
-    const plainFormData = {};
+    // Log FormData contents for debugging
     for (let [key, value] of formData.entries()) {
-      plainFormData[key] = value;
+      console.log(key, value);
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/api/events/createEvent', plainFormData, {
+      const response = await axios.post('http://localhost:3000/api/events/createEvent', formData, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
         },
       });
 
