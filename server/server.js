@@ -9,7 +9,30 @@ const auctionRoutes = require('./router/auctionRoutes');
 const sponsorRoutes = require('./router/sponsorRoutes');
 const authrouter = require('./router/auth-router');
 const cors = require('cors');
+const http = require('http');
+const socketIo = require('socket.io');
+const server = http.createServer(app);
+const io = socketIo(server, {
+    cors: {
+      origin: 'http://localhost:5173',
+      methods: ['GET', 'POST'],
+      credentials: true
+    }
+  });
+  app.set('socketio', io);
 
+  io.on('connection', (socket) => {
+    console.log('New client connected:', socket.id);
+
+    socket.on('placeBid', (bidData) => {
+      console.log('New bid placed:', bidData);
+      io.emit('newBid', bidData);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Client disconnected:', socket.id);
+    });
+  });
 connectDb().then(()=>{
     app.listen(PORT, () => {
         console.log('Server is running on port 3000');

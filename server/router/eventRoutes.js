@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const eventController = require('../controllers/eventController');
-
+const authentication = require('../middlewares/authentication');
 router.post('/createEvent', eventController.createEvent);
-router.get('/', eventController.getAllEvents);
+router.get('/', authentication,eventController.getAllEvents);
 router.get('/:id', eventController.getEventById);
 router.put('/:id', eventController.updateEvent);
 router.delete('/:id', eventController.deleteEvent);
-
+router.get('/hosted/:userId',eventController.getHostedEvents);
+router.get('/sponsored/:userId',eventController.getSponsoredEvents);
 module.exports = router;
