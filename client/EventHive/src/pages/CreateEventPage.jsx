@@ -47,7 +47,7 @@ const CreateEventPage = () => {
     duration: '',
   }]);
 
-  const steps = ['Event Details', 'Event Image', 'Auction Details'];
+  const steps = ['Event Details', 'Auction Details'];
   const navigate = useNavigate();
 
   const handleEventChange = (e) => {
@@ -83,16 +83,16 @@ const CreateEventPage = () => {
     setAuctions(auctions.filter((_, i) => i !== index));
   };
 
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEventData(prev => ({ ...prev, image: reader.result }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+//   const handleImageUpload = (event) => {
+//     const file = event.target.files[0];
+//     if (file) {
+//       const reader = new FileReader();
+//       reader.onloadend = () => {
+//         setEventData(prev => ({ ...prev, image: reader.result }));
+//       };
+//       reader.readAsDataURL(file);
+//     }
+//   };
 
 const handleSubmit = async (e) => {
     e.preventDefault();
@@ -109,17 +109,12 @@ const handleSubmit = async (e) => {
     Object.keys(eventData).forEach(key => {
       if (key === 'date') {
         formData.append(key, new Date(eventData[key]).toISOString());
-      } else if (key === 'image') {
-        // Skip the image key, we'll handle it separately
-      } else {
+      }  else {
         formData.append(key, eventData[key]);
       }
     });
 
-    // Handle image separately
-    if (eventData.image && eventData.image instanceof File) {
-        formData.append('image', eventData.image, eventData.image.name);
-    }
+
 
     // Append user ID as the event host
     formData.append('host', userId);
@@ -143,7 +138,7 @@ const handleSubmit = async (e) => {
     try {
       const response = await axios.post('http://localhost:3000/api/events/createEvent', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/json',
         },
       });
 
@@ -241,41 +236,9 @@ const handleSubmit = async (e) => {
             </Grid>
           )}
 
-          {activeStep === 1 && (
-            <Box sx={{ textAlign: 'center' }}>
-              <input
-                accept="image/*"
-                style={{ display: 'none' }}
-                id="raised-button-file"
-                type="file"
-                onChange={handleImageUpload}
-              />
-              <label htmlFor="raised-button-file">
-                <Button
-                  variant="outlined"
-                  component="span"
-                  startIcon={<ImageIcon />}
-                  sx={{ mb: 2 }}
-                >
-                  Upload Event Image
-                </Button>
-              </label>
-              {eventData.image && (
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: 300,
-                    backgroundImage: `url(${eventData.image})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    borderRadius: 1,
-                  }}
-                />
-              )}
-            </Box>
-          )}
 
-          {activeStep === 2 && (
+
+          {activeStep === 1 && (
             <>
               {auctions.map((auction, index) => (
                 <Grid container spacing={3} key={index} sx={{ mb: 4 }}>
@@ -339,7 +302,7 @@ const handleSubmit = async (e) => {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      label="Auction Duration (hours)"
+                      label="Auction Duration (minutes)"
                       name="duration"
                       variant="outlined"
                       type="number"

@@ -2,22 +2,20 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Info, MessageSquare, Send, X, Search } from 'lucide-react'
+import { Info, X, Search, Mail, Tag } from 'lucide-react'
 
 const sponsors = [
-  { id: 1, name: 'TechCorp', description: 'Leading technology solutions provider', logo: '/placeholder.svg?height=100&width=100' },
-  { id: 2, name: 'EcoGreen', description: 'Sustainable energy innovator', logo: '/placeholder.svg?height=100&width=100' },
-  { id: 3, name: 'HealthPlus', description: 'Advanced healthcare systems', logo: '/placeholder.svg?height=100&width=100' },
-  { id: 4, name: 'FinTech Solutions', description: 'Innovative financial technology', logo: '/placeholder.svg?height=100&width=100' },
-  { id: 5, name: 'EduLearn', description: 'Cutting-edge educational platforms', logo: '/placeholder.svg?height=100&width=100' },
-  { id: 6, name: 'AeroSpace', description: 'Next-generation aerospace technology', logo: '/placeholder.svg?height=100&width=100' },
+  { id: 1, name: 'TechCorp', description: 'Leading technology solutions provider', logo: '/placeholder.svg?height=100&width=100', email: 'contact@techcorp.com', type: 'Technology' },
+  { id: 2, name: 'EcoGreen', description: 'Sustainable energy innovator', logo: '/placeholder.svg?height=100&width=100', email: 'info@ecogreen.com', type: 'Energy' },
+  { id: 3, name: 'HealthPlus', description: 'Advanced healthcare systems', logo: '/placeholder.svg?height=100&width=100', email: 'support@healthplus.com', type: 'Healthcare' },
+  { id: 4, name: 'FinTech Solutions', description: 'Innovative financial technology', logo: '/placeholder.svg?height=100&width=100', email: 'hello@fintechsolutions.com', type: 'Finance' },
+  { id: 5, name: 'EduLearn', description: 'Cutting-edge educational platforms', logo: '/placeholder.svg?height=100&width=100', email: 'info@edulearn.com', type: 'Education' },
+  { id: 6, name: 'AeroSpace', description: 'Next-generation aerospace technology', logo: '/placeholder.svg?height=100&width=100', email: 'contact@aerospace.com', type: 'Aerospace' },
 ]
 
 export default function EnhancedSponsorsPage() {
   const [selectedSponsor, setSelectedSponsor] = useState(null)
-  const [message, setMessage] = useState('')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [toast, setToast] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filteredSponsors, setFilteredSponsors] = useState(sponsors)
 
@@ -29,22 +27,6 @@ export default function EnhancedSponsorsPage() {
   const handleCloseDetails = () => {
     setSelectedSponsor(null)
     setIsDialogOpen(false)
-    setMessage('')
-  }
-
-  const handleMessageChange = (event) => {
-    setMessage(event.target.value)
-  }
-
-  const handleSendMessage = () => {
-    // Here you would typically send the message to your backend
-    console.log(`Message sent to ${selectedSponsor.name}: ${message}`)
-    setMessage('')
-    handleCloseDetails()
-    setToast({
-      title: "Message Sent",
-      description: `Your message has been sent to ${selectedSponsor.name}.`,
-    })
   }
 
   const handleSearchChange = (event) => {
@@ -52,18 +34,10 @@ export default function EnhancedSponsorsPage() {
   }
 
   useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => {
-        setToast(null)
-      }, 3000)
-      return () => clearTimeout(timer)
-    }
-  }, [toast])
-
-  useEffect(() => {
     const filtered = sponsors.filter(sponsor =>
       sponsor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sponsor.description.toLowerCase().includes(searchTerm.toLowerCase())
+      sponsor.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sponsor.type.toLowerCase().includes(searchTerm.toLowerCase())
     )
     setFilteredSponsors(filtered)
   }, [searchTerm])
@@ -72,7 +46,6 @@ export default function EnhancedSponsorsPage() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold mb-8 text-center">Our Valued Sponsors</h1>
 
-      {/* Search input */}
       <div className="mb-6 relative">
         <input
           type="text"
@@ -101,6 +74,7 @@ export default function EnhancedSponsorsPage() {
                     <img src={sponsor.logo} alt={`${sponsor.name} logo`} className="w-full h-full object-cover" />
                   </div>
                   <h2 className="text-2xl font-semibold text-center mb-2">{sponsor.name}</h2>
+                  <p className="text-sm text-gray-500 text-center">{sponsor.type}</p>
                 </div>
                 <div className="px-6 pb-6 flex justify-center">
                   <button
@@ -132,39 +106,20 @@ export default function EnhancedSponsorsPage() {
                   <img src={selectedSponsor.logo} alt={`${selectedSponsor.name} logo`} className="w-full h-full object-cover" />
                 </div>
               </div>
-              <textarea
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                rows="4"
-                placeholder="Type your message here..."
-                value={message}
-                onChange={handleMessageChange}
-              ></textarea>
-            </div>
-            <div className="bg-gray-50 px-6 py-3 flex justify-end">
-              <button
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                onClick={handleSendMessage}
-              >
-                <Send className="mr-2 h-4 w-4" /> Send Message
-              </button>
+              <div className="space-y-2">
+                <div className="flex items-center">
+                  <Mail className="h-5 w-5 text-gray-400 mr-2" />
+                  <p className="text-sm text-gray-600">{selectedSponsor.email}</p>
+                </div>
+                <div className="flex items-center">
+                  <Tag className="h-5 w-5 text-gray-400 mr-2" />
+                  <p className="text-sm text-gray-600">{selectedSponsor.type}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
-
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-md shadow-lg"
-          >
-            <h4 className="font-bold">{toast.title}</h4>
-            <p>{toast.description}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }

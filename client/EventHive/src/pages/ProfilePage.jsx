@@ -20,16 +20,30 @@ import {
   MenuItem,
   FormControlLabel,
   Checkbox,
+  List,
+  ListItem,
+  ListItemText,
+  Tabs,
+  Tab,
+  Divider,
 } from '@mui/material';
-import VerifiedIcon from '@mui/icons-material/Verified';
-import EditIcon from '@mui/icons-material/Edit';
-import LogoutIcon from '@mui/icons-material/Logout';
-import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import {
+  Verified as VerifiedIcon,
+  Edit as EditIcon,
+  Logout as LogoutIcon,
+  CameraAlt as CameraAltIcon,
+  Business as BusinessIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  Language as LanguageIcon,
+  AttachMoney as AttachMoneyIcon,
+  Event as EventIcon,
+} from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 export default function ProfilePage() {
-  const { user, updateProfile, logout, updateProfileImage } = useAuth();
+  const { user, hostedEvents, sponsoredEvents, updateProfile, logout, updateProfileImage } = useAuth();
   const [openForm, setOpenForm] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -45,6 +59,7 @@ export default function ProfilePage() {
     agreementAccepted: false,
   });
   const [formProgress, setFormProgress] = useState(0);
+  const [tabValue, setTabValue] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -59,6 +74,7 @@ export default function ProfilePage() {
 
   const handleOpenForm = () => setOpenForm(true);
   const handleCloseForm = () => setOpenForm(false);
+  const handleTabChange = (event, newValue) => setTabValue(newValue);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -93,7 +109,7 @@ export default function ProfilePage() {
 
   return (
     <Container maxWidth="md">
-      <Paper elevation={3} sx={{ mt: 4, p: 4 }}>
+      <Paper elevation={3} sx={{ mt: 4, p: 4, borderRadius: 2 }}>
         {!user?.isProfileComplete && (
           <Alert severity="info" sx={{ mb: 4 }}>
             Please complete your profile to become verified and access all features.
@@ -105,7 +121,7 @@ export default function ProfilePage() {
               <Avatar
                 src={user?.avatarUrl}
                 alt={user?.name}
-                sx={{ width: 100, height: 100, mr: 2 }}
+                sx={{ width: 120, height: 120, mr: 3 }}
               />
               <IconButton
                 sx={{
@@ -127,7 +143,7 @@ export default function ProfilePage() {
               </IconButton>
             </Box>
             <Box>
-              <Typography variant="h4" display="flex" alignItems="center">
+              <Typography variant="h4" fontWeight="bold" display="flex" alignItems="center">
                 {user?.name}
                 {user?.isProfileComplete && (
                   <VerifiedIcon sx={{ ml: 1, color: 'primary.main' }} />
@@ -135,6 +151,9 @@ export default function ProfilePage() {
               </Typography>
               <Typography variant="subtitle1" color="text.secondary">
                 {user?.email}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" mt={1}>
+                {/* {user?.userType === 'sponsor' ? 'Sponsor' : 'Event Host'} */}
               </Typography>
             </Box>
           </Box>
@@ -148,28 +167,77 @@ export default function ProfilePage() {
           )}
         </Box>
 
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
-            <Typography variant="h6">User Information</Typography>
-            <Typography>Name: {user?.name || 'Not provided'}</Typography>
-            <Typography>Email: {user?.email || 'Not provided'}</Typography>
-            <Typography>Phone: {user?.phone || 'Not provided'}</Typography>
-            <Typography>User Type: {user?.userType || 'Not specified'}</Typography>
-          </Grid>
-          {user?.userType === 'sponsor' && (
+        <Divider sx={{ my: 3 }} />
+
+        <Tabs value={tabValue} onChange={handleTabChange} centered sx={{ mb: 3 }}>
+          <Tab label="Profile" />
+          <Tab label="Hosted Events" />
+          <Tab label="Sponsored Events" />
+        </Tabs>
+
+        {tabValue === 0 && (
+          <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
-              <Typography variant="h6">Company Information</Typography>
-              <Typography>Company: {user?.companyName || 'Not provided'}</Typography>
-              <Typography>Website: {user?.companyWebsite || 'Not provided'}</Typography>
-              <Typography>Industry: {user?.industry || 'Not provided'}</Typography>
-              <Typography>Budget: {user?.sponsorshipBudget || 'Not provided'}</Typography>
+              <Typography variant="h6" gutterBottom>User Information</Typography>
+              <Box display="flex" alignItems="center" mb={1}>
+                <EmailIcon color="action" sx={{ mr: 1 }} />
+                <Typography>{user?.email || 'Not provided'}</Typography>
+              </Box>
+              <Box display="flex" alignItems="center" mb={1}>
+                <PhoneIcon color="action" sx={{ mr: 1 }} />
+                <Typography>{user?.phone || 'Not provided'}</Typography>
+              </Box>
             </Grid>
-          )}
-          <Grid item xs={12}>
-            <Typography variant="h6">Bio</Typography>
-            <Typography>{user?.bio || 'No bio provided'}</Typography>
+            <Grid item xs={12}>
+              <Typography variant="h6" gutterBottom>Bio</Typography>
+              <Typography>{user?.bio || 'No bio provided'}</Typography>
+            </Grid>
           </Grid>
-        </Grid>
+        )}
+
+        {tabValue === 1 && (
+          <Box>
+            <Typography variant="h6" gutterBottom>Hosted Events</Typography>
+            {hostedEvents.length > 0 ? (
+              <List>
+                {hostedEvents.map((event) => (
+                  <ListItem key={event._id}>
+                    <ListItemText
+                      primary={event.title}
+                      secondary={`Date: ${new Date(event.date).toLocaleDateString()} - Location: ${event.location}`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+              <Typography>No events hosted yet.</Typography>
+            )}
+          </Box>
+        )}
+
+        {tabValue === 2 && (
+            <Box>
+  <Typography variant="h6" gutterBottom>Sponsored Events</Typography>
+  {sponsoredEvents && sponsoredEvents.participatedAuctions.length > 0 ? (
+    <List>
+      {sponsoredEvents.participatedAuctions.map((auction) => (
+        <ListItem key={auction._id}>
+          <ListItemText
+            primary={auction.itemName}
+            secondary={`Date: ${new Date(auction.createdAt).toLocaleDateString()} - Description: ${auction.itemDescription}`}
+          />
+          <Typography variant="body2" color="text.secondary">
+            Status: {auction.status} - Current Highest Bid: ${auction.currentHighestBid}
+          </Typography>
+        </ListItem>
+      ))}
+    </List>
+  ) : (
+    <Typography>No events sponsored yet.</Typography>
+  )}
+</Box>
+
+        )}
 
         <Box mt={4} display="flex" justifyContent="space-between">
           <Button
@@ -201,99 +269,73 @@ export default function ProfilePage() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    margin="normal"
                     label="Name"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    required
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    margin="normal"
                     label="Email"
                     name="email"
                     type="email"
                     value={formData.email}
                     onChange={handleChange}
-                    required
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    margin="normal"
                     label="Phone"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    required
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Select
+                  <TextField
                     fullWidth
-                    margin="normal"
-                    label="User Type"
-                    name="userType"
-                    value={formData.userType}
+                    label="Company Name"
+                    name="companyName"
+                    value={formData.companyName}
                     onChange={handleChange}
-                    required
-                  >
-                    <MenuItem value="sponsor">Sponsor</MenuItem>
-                    <MenuItem value="eventHost">Event Host</MenuItem>
-                  </Select>
+                  />
                 </Grid>
-                {formData.userType === 'sponsor' && (
-                  <>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        margin="normal"
-                        label="Company Name"
-                        name="companyName"
-                        value={formData.companyName}
-                        onChange={handleChange}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        margin="normal"
-                        label="Company Website"
-                        name="companyWebsite"
-                        value={formData.companyWebsite}
-                        onChange={handleChange}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        margin="normal"
-                        label="Industry"
-                        name="industry"
-                        value={formData.industry}
-                        onChange={handleChange}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        margin="normal"
-                        label="Sponsorship Budget"
-                        name="sponsorshipBudget"
-                        value={formData.sponsorshipBudget}
-                        onChange={handleChange}
-                      />
-                    </Grid>
-                  </>
-                )}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Company Website"
+                    name="companyWebsite"
+                    value={formData.companyWebsite}
+                    onChange={handleChange}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Industry"
+                    name="industry"
+                    value={formData.industry}
+                    onChange={handleChange}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Sponsorship Budget"
+                    name="sponsorshipBudget"
+                    value={formData.sponsorshipBudget}
+                    onChange={handleChange}
+                    InputProps={{
+                      startAdornment: <AttachMoneyIcon />,
+                    }}
+                  />
+                </Grid>
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    margin="normal"
                     label="Bio"
                     name="bio"
                     multiline
@@ -303,23 +345,18 @@ export default function ProfilePage() {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <input
-                    accept="image/*,.pdf"
-                    style={{ display: 'none' }}
-                    id="verification-document"
-                    type="file"
-                    onChange={handleFileUpload}
-                  />
-                  <label htmlFor="verification-document">
-                    <Button variant="contained" component="span">
-                      Upload Verification Document
-                    </Button>
-                  </label>
-                  {formData.verificationDocument && (
-                    <Typography variant="body2" sx={{ mt: 1 }}>
-                      File uploaded: {formData.verificationDocument.name}
-                    </Typography>
-                  )}
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    fullWidth
+                  >
+                    Upload Verification Document
+                    <input
+                      type="file"
+                      hidden
+                      onChange={handleFileUpload}
+                    />
+                  </Button>
                 </Grid>
                 <Grid item xs={12}>
                   <FormControlLabel
@@ -328,20 +365,16 @@ export default function ProfilePage() {
                         checked={formData.agreementAccepted}
                         onChange={handleChange}
                         name="agreementAccepted"
-                        color="primary"
-                        required
                       />
                     }
-                    label="I agree to the terms and conditions"
+                    label="I accept the terms and conditions"
                   />
                 </Grid>
               </Grid>
             </DialogContent>
             <DialogActions>
               <Button onClick={handleCloseForm}>Cancel</Button>
-              <Button type="submit" variant="contained" color="primary">
-                Save
-              </Button>
+              <Button type="submit" variant="contained" color="primary">Save</Button>
             </DialogActions>
           </form>
         </Dialog>

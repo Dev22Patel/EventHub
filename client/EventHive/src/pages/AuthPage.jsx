@@ -38,10 +38,10 @@ const AuthPage = () => {
     try {
       const response = await axios.post('http://localhost:3000/api/auth/login', values);
       console.log(response);
-      localStorage.setItem('authToken', response.data.token);
+      localStorage.setItem('token', response.data.token);
       localStorage.setItem('userId', response.data.userId);
       login();
-      toast.success('Login successful!'); // Success toast
+      toast.success('Login successful!');
       navigate('/');
     } catch (error) {
       toast.error(error.response?.data?.message || 'An error occurred during login');
@@ -52,8 +52,8 @@ const AuthPage = () => {
   const handleRegister = async (values, { setSubmitting }) => {
     try {
       const response = await axios.post('http://localhost:3000/api/auth/register', values);
-      console.log(response);
-      localStorage.setItem('authToken', response.data.token);
+      console.log(response.data.token);
+      localStorage.setItem('token', response.data.token);
       localStorage.setItem('userId', response.data.userId);
       login();
       toast.success('Registration successful!'); // Success toast
@@ -73,6 +73,7 @@ const AuthPage = () => {
   };
 
   return (
+
     <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
       <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 }, bgcolor: 'background.paper' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
@@ -81,6 +82,8 @@ const AuthPage = () => {
             Welcome to EventHive
           </Typography>
         </Box>
+        
+        <ToastContainer />
 
         {isAuthenticated ? (
           <>
@@ -238,7 +241,6 @@ const AuthPage = () => {
         )}
       </Paper>
 
-      <ToastContainer />
     </Container>
   );
 };

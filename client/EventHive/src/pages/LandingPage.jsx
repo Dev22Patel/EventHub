@@ -258,7 +258,7 @@ const LandingPage = () => {
       {/* For Event Hosts and For Sponsors sections remain largely the same,
          with minor styling updates to match the new theme */}
 
-      <Box sx={{ bgcolor: theme.palette.primary.main, color: 'common.white', py: 10 }}>
+      <Box sx={{ color: 'common.black', py: 10 }}>
         <Container maxWidth="md" sx={{ textAlign: 'center' }}>
           <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold' }}>
             Ready to Transform Your Events?

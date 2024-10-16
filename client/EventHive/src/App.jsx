@@ -65,7 +65,7 @@ function App() {
           <Route path="/sponsors" element={<EnhancedSponsorsPage />} />
           <Route path="/events/:eventId/auctions/:auctionId" element={<AuctionBiddingPage />} />
         </Routes>
-        <div className='h-2 w-2'></div>
+        
         <Footer />
       </Router>
     </ThemeProvider>

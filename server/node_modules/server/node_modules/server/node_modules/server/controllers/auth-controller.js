@@ -1,5 +1,6 @@
 const User = require('../models/user-model')
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken'); // Import JWT
 
 const home = async (req,res) => {
     try{
@@ -53,8 +54,12 @@ const login = async (req,res) => {
 
     }
 }
+
+
+
+
 module.exports = {
     home,
     register,
-    login
+    login,
 };

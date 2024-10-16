@@ -8,10 +8,10 @@ const ForgotPasswordSchema = Yup.object().shape({
 });
 
 const ForgotPasswordPage = () => {
-  const handleSubmit = (values, { setSubmitting }) => {
+    const handleSubmit = (values, { setSubmitting }) => {
     console.log('Password reset request:', values);
     setSubmitting(false);
-  };
+};
 
   return (
     <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
