@@ -23,7 +23,7 @@ const User = require('../models/user-model');
    exports.createEvent = async (req, res) => {
     try {
       console.log('Received request body:', req.body);
-      console.log('Received files:', req.files);
+      console.log('Received files:', req.file);
 
       const { auctions, ...eventData } = req.body;
       const host = req.body.host;
@@ -139,4 +139,38 @@ exports.updateAuction = async (req, res) => {
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
+};
+
+exports.getHostedEvents = async (req, res) => {
+    const userId = req.params.userId;
+
+    try {
+        const user = await User.findById(userId).populate('events');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        // console.log(user);
+        res.status(200).json(user.events);
+    } catch (error) {
+        console.error('Error fetching hosted events:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+exports.getSponsoredEvents = async (req, res) => {
+    const userId = req.params.userId;
+
+    try {
+        const user = await User.findById(userId).populate('participatedAuctions');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        // console.log("bidder starts");
+        // console.log(user);
+
+        res.status(200).json(user.sponsoredEvents);
+    } catch (error) {
+        console.error('Error fetching sponsored events:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 };

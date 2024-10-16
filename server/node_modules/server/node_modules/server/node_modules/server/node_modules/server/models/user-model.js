@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
+require("dotenv").config();
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
@@ -22,7 +22,12 @@ const userSchema = new mongoose.Schema({
             ref: 'Event'
         }
     ],
-    participatedAuctions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Auction' }],
+    participatedAuctions: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Auction'
+        }
+    ],
 },{timestamps:true});
 
 
@@ -46,7 +51,7 @@ userSchema.methods.generateToken = function () {
             userId : this._id.toString(),
             email:this.email,
         },
-        "thisismyseceratekey",
+        process.env.JWT_SECRET_KEY,
         {
             expiresIn: "1d",
         }
