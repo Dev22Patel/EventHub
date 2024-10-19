@@ -48,6 +48,7 @@ const AuctionBiddingPage = () => {
       }
     };
 
+    //polling
     useEffect(() => {
       fetchAuction();
       const intervalId = setInterval(fetchAuction, 3000);
@@ -133,7 +134,7 @@ const AuctionBiddingPage = () => {
     }
 
     const isAuctionFinished = auction.status === 'finished' || timeLeft === 'Auction Ended';
-    
+
     const winner = isAuctionFinished && auction.bids.length > 0
       ? auction.bids.reduce((prev, current) => (prev.amount > current.amount) ? prev : current)
       : null;

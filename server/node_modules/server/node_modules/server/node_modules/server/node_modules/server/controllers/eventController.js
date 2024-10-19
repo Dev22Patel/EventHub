@@ -23,7 +23,7 @@ const User = require('../models/user-model');
    exports.createEvent = async (req, res) => {
     try {
       console.log('Received request body:', req.body);
-      console.log('Received files:', req.file);
+    //   console.log('Received files:', req.file);
 
       const { auctions, ...eventData } = req.body;
       const host = req.body.host;

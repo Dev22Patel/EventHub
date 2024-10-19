@@ -23,7 +23,7 @@ const EventCard = ({ event }) => {
             {/* Remove the image section entirely */}
             <div className="p-4 flex-grow">
               <h2 className="text-xl font-bold text-black mb-1">{event.title}</h2>
-              <motion.p
+              <motion.p 
                 className="text-sm text-gray-600 mb-2"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: isHovered ? 1 : 0, height: isHovered ? 'auto' : 0 }}
@@ -75,12 +75,8 @@ const SponsorEventsPage = () => {
   useEffect(() => {
     const fetchEvents = async () => {
         try {
-          const token = localStorage.getItem('token'); 
-          const response = await axios.get('http://localhost:3000/api/events', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          const token = localStorage.getItem('token');
+          const response = await axios.get('http://localhost:3000/api/events');
           setEvents(response.data);
           setLoading(false);
         } catch (err) {

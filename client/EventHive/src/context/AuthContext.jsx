@@ -1,18 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios'; // Make sure to install axios if not already installed
+import axios from 'axios';
 
-// Create Context
 const AuthContext = createContext();
 
-// Provider Component
 export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [hostedEvents, setHostedEvents] = useState([]);
     const [sponsoredEvents, setSponsoredEvents] = useState([]);
 
-    // Check localStorage on mount
     useEffect(() => {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem('token');
         if (token) {
             setIsAuthenticated(true);
             getHostedEvents();
@@ -22,14 +19,14 @@ export const AuthProvider = ({ children }) => {
 
     const login = (token) => {
         setIsAuthenticated(true);
-        localStorage.setItem('authToken', token); // Store token in localStorage
+        localStorage.setItem('token', token);
     };
 
     const logout = () => {
         setIsAuthenticated(false);
-        localStorage.removeItem('authToken'); // Remove token from localStorage
-        setHostedEvents([]); // Clear hosted events
-        setSponsoredEvents([]); // Clear sponsored events
+        localStorage.removeItem('token');
+        setHostedEvents([]);
+        setSponsoredEvents([]);
     };
 
     const getHostedEvents = async () => {

@@ -7,7 +7,7 @@ const auctionSchema = new Schema({
   itemDescription: { type: String, required: true },
   startingBid: { type: Number, required: true },
   bidIncrement: { type: Number, required: true },
-  duration: { type: Number, required: true }, // in hours
+  duration: { type: Number, required: true }, // in mins I guess :(
   status: { type: String, enum: ['pending', 'active', 'completed'], default: 'pending' },
   currentHighestBid: { type: Number, default: 0 },
   bids: [{

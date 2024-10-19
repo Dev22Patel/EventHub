@@ -149,7 +149,6 @@ const handleSubmit = async (e) => {
       alert('Failed to create event. Please check the console for more details.');
     }
   };
-  // ... (keep the handleNext and handleBack functions)
 
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>

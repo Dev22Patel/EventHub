@@ -257,33 +257,3 @@ exports.checkAuctionStatus = async (req, res) => {
         return res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 };
-
-// exports.getAuction = async (req, res) => {
-//     const { auctionId } = req.params;
-
-//     try {
-//         const auction = await Auction.findById(auctionId).populate('event');
-
-//         if (!auction) {
-//             return res.status(404).json({ message: 'Auction not found' });
-//         }
-
-//         const now = new Date();
-//         const auctionEndTime = new Date(auction.createdAt.getTime() + auction.duration * 60 * 1000);
-
-//         // Check if the auction should be marked as finished
-//         if (now > auctionEndTime && auction.status === 'active') {
-//             auction.status = 'finished';
-//             await auction.save();
-//         }
-
-//         // Return auction data along with server time
-//         return res.status(200).json({
-//             ...auction.toObject(),
-//             serverTime: now
-//         });
-//     } catch (error) {
-//         console.error('Error fetching auction:', error);
-//         return res.status(500).json({ message: 'Internal server error', error: error.message });
-//     }
-// };
