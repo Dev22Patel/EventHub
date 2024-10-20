@@ -8,7 +8,9 @@ const auctionSchema = new Schema({
   startingBid: { type: Number, required: true },
   bidIncrement: { type: Number, required: true },
   duration: { type: Number, required: true }, // in mins I guess :(
-  status: { type: String, enum: ['pending', 'active', 'completed'], default: 'pending' },
+  status: {  type: String,
+    enum: ['active', 'finished', 'cancelled'],
+    default: 'active' },
   currentHighestBid: { type: Number, default: 0 },
   bids: [{
     bidder: { type: Schema.Types.ObjectId, ref: 'User' },

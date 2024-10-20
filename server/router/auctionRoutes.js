@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const auctionController = require('../controllers/auctionController');
 const authentication = require("../middlewares/authentication");
+
 router.get('/events/:eventId/auctions/:auctionId', auctionController.getAuctionForEvent);
 router.post('/events/:eventId/auctions/:auctionId/bids', auctionController.placeBid);
 

@@ -166,9 +166,9 @@ exports.getSponsoredEvents = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
         // console.log("bidder starts");
-        // console.log(user);
+        // console.log(user.participatedAuctions);
 
-        res.status(200).json(user.sponsoredEvents);
+        res.status(200).json(user.participatedAuctions);
     } catch (error) {
         console.error('Error fetching sponsored events:', error);
         res.status(500).json({ message: 'Internal server error' });

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Typography,
   Container,
@@ -18,127 +18,222 @@ import {
   Alert,
   Grid,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import { ArrowBack, Gavel, AccessTime } from '@mui/icons-material';
 
 const AuctionBiddingPage = () => {
-    const [auction, setAuction] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [bidAmount, setBidAmount] = useState('');
-    const [timeLeft, setTimeLeft] = useState('');
-    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
-    const navigate = useNavigate();
-    const { eventId, auctionId } = useParams();
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [auction, setAuction] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [bidAmount, setBidAmount] = useState('');
+  const [timeLeft, setTimeLeft] = useState('');
+  const [isEnded, setIsEnded] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+  const [showFinishedPopup, setShowFinishedPopup] = useState(false);
+  const navigate = useNavigate();
+  const { eventId, auctionId } = useParams();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const userId = localStorage.getItem('userId');
 
-    const fetchAuction = async () => {
-      try {
-        if (!eventId || !auctionId) {
-          throw new Error("Missing eventId or auctionId");
+  const calculateEndTime = useCallback((auctionData) => {
+    if (!auctionData?.createdAt || !auctionData?.duration) return null;
+    return new Date(new Date(auctionData.createdAt).getTime() + auctionData.duration * 60 * 1000);
+  }, []);
+
+  const isEventHost = useMemo(() => {
+    return auction?.event?.host === userId;
+  }, [auction?.event?.host, userId]);
+
+  const hasShownEndedPopup = useCallback((auctionId) => {
+    return localStorage.getItem(`auction_ended_popup_${auctionId}`) === 'shown';
+  }, []);
+
+  const markEndedPopupAsShown = useCallback((auctionId) => {
+    localStorage.setItem(`auction_ended_popup_${auctionId}`, 'shown');
+  }, []);
+
+  const fetchAuction = useCallback(async () => {
+    try {
+      if (!eventId || !auctionId) {
+        throw new Error("Missing eventId or auctionId");
+      }
+      const response = await axios.get(`http://localhost:3000/api/events/${eventId}/auctions/${auctionId}`);
+      const auctionData = response.data;
+
+      const endTime = calculateEndTime(auctionData);
+      const now = new Date();
+      const isAuctionEnded = endTime ? now >= endTime : false;
+
+      setAuction(auctionData);
+      setIsEnded(isAuctionEnded || auctionData.status === 'finished');
+
+      if ((isAuctionEnded || auctionData.status === 'finished') && !hasShownEndedPopup(auctionId)) {
+        setShowFinishedPopup(true);
+        markEndedPopupAsShown(auctionId);
+      }
+    } catch (err) {
+      setError(`Failed to fetch auction details: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }, [eventId, auctionId, calculateEndTime]);
+
+  useEffect(() => {
+    fetchAuction();
+    const intervalId = setInterval(fetchAuction, 5000);
+    return () => clearInterval(intervalId);
+  }, [fetchAuction]);
+
+  useEffect(() => {
+    if (!auction || isEnded) return;
+
+    const endTime = calculateEndTime(auction);
+    if (!endTime) return;
+
+    const timer = setInterval(() => {
+      const now = new Date();
+      if (now >= endTime) {
+        setIsEnded(true);
+        setTimeLeft('Auction Ended');
+        clearInterval(timer);
+        fetchAuction();
+        return;
+      }
+
+      const difference = endTime.getTime() - now.getTime();
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((difference / 1000 / 60) % 60);
+      const seconds = Math.floor((difference / 1000) % 60);
+
+      setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [auction, isEnded, calculateEndTime, fetchAuction]);
+
+  const handleBidSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!userId) {
+      setSnackbar({
+        open: true,
+        message: 'Please log in to place a bid',
+        severity: 'error'
+      });
+      return;
+    }
+
+    if (isEventHost) {
+      setSnackbar({
+        open: true,
+        message: 'Event hosts cannot bid on their own auctions',
+        severity: 'error'
+      });
+      return;
+    }
+
+    const bidAmountNum = Number(bidAmount);
+    if (!isBidValid(bidAmountNum)) {
+      setSnackbar({
+        open: true,
+        message: `Bid must be at least $${auction.currentHighestBid + auction.bidIncrement}`,
+        severity: 'error'
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/api/events/${eventId}/auctions/${auctionId}/bids`,
+        {
+          amount: bidAmountNum,
+          id: userId,
+          userId:userId
         }
-        const response = await axios.get(`http://localhost:3000/api/events/${eventId}/auctions/${auctionId}`);
-        setAuction(response.data);
-      } catch (err) {
-        setError(`Failed to fetch auction details: ${err.message}`);
-      } finally {
+      );
+      setLoading(true);
+      setAuction(response.data);
+      setBidAmount('');
+      setSnackbar({
+        open: true,
+        message: 'Bid placed successfully!',
+        severity: 'success'
+      });
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Failed to place bid. Please try again.';
+      setSnackbar({
+        open: true,
+        message: errorMessage,
+        severity: 'error'
+      });
+    }
+    finally{
         setLoading(false);
-      }
-    };
+    }
+  };
 
-    //polling
-    useEffect(() => {
-      fetchAuction();
-      const intervalId = setInterval(fetchAuction, 3000);
-      return () => clearInterval(intervalId);
-    }, [auctionId, eventId]);
+  const isBidValid = (amount) => {
+    if (!auction || isEnded) return false;
+    const bidAmountNum = Number(amount);
+    const minimumBid = getMinimumBidAmount();
 
-    useEffect(() => {
-        if (auction) {
-          const timer = setInterval(() => {
-            const now = new Date();
-            const serverTime = new Date(auction.serverTime);
-            const auctionEndTime = new Date(auction.auctionEndTime);
-            const timeDiff = serverTime.getTime() - now.getTime();
-            const difference = auctionEndTime.getTime() - (now.getTime() + timeDiff);
+    return (
+      !isNaN(bidAmountNum) &&
+      bidAmountNum >= minimumBid
+    );
+  };
 
-            if (difference > 0) {
-              const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-              const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-              const minutes = Math.floor((difference / 1000 / 60) % 60);
-              const seconds = Math.floor((difference / 1000) % 60);
+  const getHighestBidder = () => {
+    if (!auction || auction.bids.length === 0) return null;
 
-              setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`);
-            } else {
-              setTimeLeft('Auction Ended');
-              clearInterval(timer);
-            }
-          }, 1000);
+    return auction.bids.reduce((prev, current) => {
+      return (prev.amount > current.amount) ? prev : current;
+    });
+  };
 
-          return () => clearInterval(timer);
-        }
-      }, [auction]);
+  const getMinimumBidAmount = () => {
+    if (!auction) return 0;
 
-
-    const id = localStorage.getItem('userId');
-
-    const handleBidSubmit = async (e) => {
-      e.preventDefault();
-      try {
-        const response = await axios.post(`http://localhost:3000/api/events/${eventId}/auctions/${auctionId}/bids`, {
-          amount: Number(bidAmount),
-          id: id
-        });
-        setAuction(response.data);
-        setSnackbar({ open: true, message: 'Bid placed successfully!', severity: 'success' });
-        setBidAmount('');
-      } catch (err) {
-        console.error('Bid placement error:', err.response?.data || err.message);
-        setSnackbar({
-          open: true,
-          message: `Failed to place bid: ${err.response?.data?.message || err.message}`,
-          severity: 'error'
-        });
-      }
-    };
-
-    const isBidValid = () => {
-      if (!auction) return false;
-      const bidAmountNum = Number(bidAmount);
-      return (
-        bidAmountNum > auction.currentHighestBid &&
-        bidAmountNum >= auction.currentHighestBid + auction.bidIncrement
-      );
-    };
-
-    if (loading) {
-      return (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-          <CircularProgress />
-        </Box>
-      );
+    if (auction.bids.length === 0) {
+      return auction.startingBid;
     }
 
-    if (error) {
-      return (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-          <Typography color="error">{error}</Typography>
-        </Box>
-      );
+    return auction.currentHighestBid + auction.bidIncrement;
+  };
+
+  const getHelperText = () => {
+    const minBid = getMinimumBidAmount();
+    if (auction.bids.length === 0) {
+      return `Starting bid: $${minBid.toLocaleString()}`;
     }
+    return `Minimum bid: $${minBid.toLocaleString()}`;
+  };
 
-    if (!auction) {
-      return null;
-    }
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
-    const isAuctionFinished = auction.status === 'finished' || timeLeft === 'Auction Ended';
+  if (error) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
+  }
 
-    const winner = isAuctionFinished && auction.bids.length > 0
-      ? auction.bids.reduce((prev, current) => (prev.amount > current.amount) ? prev : current)
-      : null;
-
+  if (!auction) return null;
+  const winner = getHighestBidder();
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <motion.div
@@ -146,59 +241,70 @@ const AuctionBiddingPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Button startIcon={<ArrowBack />} onClick={() => navigate(-1)} sx={{ mb: 2 }}>
+        <Button
+          startIcon={<ArrowBack />}
+          onClick={() => navigate(-1)}
+          sx={{ mb: 2 }}
+        >
           Back to Event
         </Button>
+
         <Grid container spacing={4}>
           <Grid item xs={12} md={8}>
             <Paper elevation={3} sx={{ p: 4, mb: 4, borderRadius: 2 }}>
               <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
                 {auction.itemName}
               </Typography>
+
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
                 {auction.itemDescription}
               </Typography>
+
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                 <Gavel fontSize="large" sx={{ color: 'primary.main', mr: 1 }} />
                 <Typography variant="h5" sx={{ fontWeight: 'medium' }}>
-                  {isAuctionFinished ? 'Final Bid:' : 'Current Highest Bid:'} ${auction.currentHighestBid}
+                  {isEnded ? 'Final Bid:' : 'Current Bid:'} ${auction.currentHighestBid.toLocaleString()}
                 </Typography>
               </Box>
+
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                 <AccessTime fontSize="large" sx={{ color: 'primary.main', mr: 1 }} />
-                <Typography variant="h6">{timeLeft}</Typography>
+                <Typography variant="h6" color={isEnded ? 'error' : 'inherit'}>
+                  {!timeLeft ? "Auction Ended" : timeLeft}
+                </Typography>
               </Box>
-              {isAuctionFinished ? (
+
+              {isEnded ? (
                 <Box sx={{ mt: 3, p: 2, bgcolor: 'success.light', borderRadius: 2 }}>
                   <Typography variant="h5" sx={{ color: 'success.contrastText' }}>
-                    Auction Winner: {winner ? 'Anonymous Bidder' : 'No winner'}
+                    {winner ? `Auction Winner: Anonymous ` : 'No Bids Placed'}
                   </Typography>
                   {winner && (
                     <Typography variant="h6" sx={{ color: 'success.contrastText', mt: 1 }}>
-                      Winning Bid: ${winner.amount}
+                      Winning Bid: ${winner.amount.toLocaleString()}
                     </Typography>
                   )}
                 </Box>
               ) : (
                 <Box component="form" onSubmit={handleBidSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <TextField
-                    label="Enter your bid"
+                    label={auction.bids.length === 0 ? "Enter Starting Bid" : "Your Bid Amount"}
                     type="number"
                     value={bidAmount}
                     onChange={(e) => setBidAmount(e.target.value)}
                     fullWidth
                     variant="outlined"
                     required
-                    helperText={`Minimum bid: $${auction.currentHighestBid + auction.bidIncrement}`}
+                    helperText={getHelperText()}
                   />
                   <Button
                     variant="contained"
                     color="primary"
                     type="submit"
                     fullWidth
-                    disabled={!isBidValid()}
+                    disabled={!isBidValid(bidAmount) || isEventHost}
                   >
-                    Place Bid
+                    {isEventHost ? 'Hosts Cannot Bid' : 'Place Bid'}
                   </Button>
                 </Box>
               )}
@@ -208,51 +314,32 @@ const AuctionBiddingPage = () => {
               <Typography variant="h5" gutterBottom>
                 Bid History
               </Typography>
-              <Box sx={{ height: auction.bids.length === 0 ? 100 : 300, overflow: 'auto' }}>
+              <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
                 <List>
-                  {auction.bids
-                    .slice()
-                    .sort((a, b) => b.amount - a.amount)
-                    .slice(0, 3)
-                    .map((bid, index) => (
-                      <React.Fragment key={index}>
-                        <ListItem>
-                          <ListItemText
-                            primary={`Anonymous Bidder`}
-                            secondary={`Amount: $${bid.amount}`}
-                          />
-                        </ListItem>
-                        <Divider />
-                      </React.Fragment>
-                    ))}
-                  {auction.bids.length === 0 && (
+                  {auction.bids.length > 0 ? (
+                    auction.bids
+                      .sort((a, b) => b.amount - a.amount)
+                      .map((bid, index) => (
+                        <React.Fragment key={index}>
+                          <ListItem>
+                            <ListItemText
+                              primary={`Anonymous Bidder ${bid.userId === userId ? '(You)' : ''}`}
+                              secondary={`Bid Amount: $${bid.amount.toLocaleString()}`}
+                            />
+                          </ListItem>
+                          <Divider />
+                        </React.Fragment>
+                      ))
+                  ) : (
                     <Typography variant="body2" sx={{ p: 2, textAlign: 'center' }}>
-                      No Bidder Currently
+                      No bids placed yet
                     </Typography>
-                  )}
-                  {auction.bids.length > 3 && (
-                    <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
-                      {auction.bids
-                        .slice()
-                        .sort((a, b) => b.amount - a.amount)
-                        .slice(3)
-                        .map((bid, index) => (
-                          <React.Fragment key={index + 3}>
-                            <ListItem>
-                              <ListItemText
-                                primary={`Anonymous Bidder`}
-                                secondary={`Amount: $${bid.amount}`}
-                              />
-                            </ListItem>
-                            <Divider />
-                          </React.Fragment>
-                        ))}
-                    </Box>
                   )}
                 </List>
               </Box>
             </Paper>
           </Grid>
+
           <Grid item xs={12} md={4}>
             <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
               <Typography variant="h5" gutterBottom>
@@ -260,22 +347,40 @@ const AuctionBiddingPage = () => {
               </Typography>
               <List>
                 <ListItem>
-                  <ListItemText primary="Organizer" secondary={auction.event.title} />
+                  <ListItemText
+                    primary="Event"
+                    secondary={auction.event.title}
+                  />
                 </ListItem>
                 <ListItem>
                   <ListItemText
                     primary="Start Date"
-                    secondary={new Date(auction.createdAt).toLocaleDateString()}
+                    secondary={new Date(auction.createdAt).toLocaleString()}
                   />
                 </ListItem>
                 <ListItem>
-                  <ListItemText primary="Starting Bid" secondary={`$${auction.startingBid}`} />
+                  <ListItemText
+                    primary="End Date"
+                    secondary={new Date(auction.auctionEndTime).toLocaleString()}
+                  />
                 </ListItem>
                 <ListItem>
-                  <ListItemText primary="Bid Increment" secondary={`$${auction.bidIncrement}`} />
+                  <ListItemText
+                    primary="Starting Bid"
+                    secondary={`$${auction.startingBid.toLocaleString()}`}
+                  />
                 </ListItem>
                 <ListItem>
-                  <ListItemText primary="Status" secondary={isAuctionFinished ? "Finished" : "Pending"} />
+                  <ListItemText
+                    primary="Minimum Increment"
+                    secondary={`$${auction.bidIncrement.toLocaleString()}`}
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText
+                    primary="Status"
+                    secondary={isEnded ? "Finished" : "Active"}
+                  />
                 </ListItem>
               </List>
             </Paper>
@@ -288,10 +393,36 @@ const AuctionBiddingPage = () => {
         autoHideDuration={6000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
       >
-        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity}>
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          variant="filled"
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      <AnimatePresence>
+        {showFinishedPopup && (
+          <Dialog
+            open={showFinishedPopup}
+            onClose={() => setShowFinishedPopup(false)}
+            aria-labelledby="auction-finished-dialog-title"
+          >
+            <DialogTitle id="auction-finished-dialog-title">Auction Finished</DialogTitle>
+            <DialogContent>
+              <Typography>
+                This auction has ended. The winning bid was ${auction.currentHighestBid.toLocaleString()}.
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setShowFinishedPopup(false)} color="primary">
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
+        )}
+      </AnimatePresence>
     </Container>
   );
 };
