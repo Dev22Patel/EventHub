@@ -77,11 +77,11 @@ export default function ProfilePage() {
   return (
     <Container maxWidth="md">
       <Paper elevation={3} sx={{ mt: 4, p: 4, borderRadius: 2 }}>
-        {!currentUser?.isProfileComplete && (
+        {/* {!currentUser?.isProfileComplete && (
           <Alert severity="info" sx={{ mb: 4 }}>
             Please complete your profile to become verified and access all features.
           </Alert>
-        )}
+        )} */}
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={4}>
           <Box display="flex" alignItems="center">
             <Box position="relative">
@@ -227,14 +227,14 @@ export default function ProfilePage() {
           >
             Logout
           </Button>
-          <Button
+          {/* <Button
             variant="contained"
             color="primary"
             startIcon={<EditIcon />}
             onClick={handleCompleteProfile}
           >
             Complete Profile
-          </Button>
+          </Button> */}
         </Box>
       </Paper>
     </Container>

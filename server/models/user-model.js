@@ -45,7 +45,7 @@ userSchema.pre('save',async function(next){
     }
 });
 
-userSchema.methods.generateToken = function () {
+userSchema.methods.generateToken = function (res) {
     try {
         return jwt.sign({
             userId : this._id.toString(),
@@ -58,7 +58,7 @@ userSchema.methods.generateToken = function () {
     );
     }  catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res?.status(500).json({ message: "Internal server error" });
     }
 
 }
