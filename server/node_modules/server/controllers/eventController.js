@@ -1,7 +1,6 @@
 const Event = require('../models/eventModel');
 const Auction = require('../models/auctionModel');
 const User = require('../models/user-model');
-
    const uploadImage = async (file) => {
      if (!file) return null;
      // Implement your image upload logic here
@@ -61,12 +60,27 @@ const User = require('../models/user-model');
 
 // Read all Events
 exports.getAllEvents = async (req, res) => {
-  try {
-    const events = await Event.find().populate('host');
-    res.status(200).json(events);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+    try {
+      // Fetch events and populate both the host and auctions
+      const events = await Event.find()
+        .populate('host') // Populate host details
+        .populate('auctions'); // Populate auction details
+
+      // Map the events to include auction statuses
+      const eventsWithAuctionStatus = events.map(event => {
+        return {
+          ...event.toObject(), // Convert Mongoose document to plain object
+          auctions: event.auctions.map(auction => ({
+            id: auction._id,
+            status: auction.status, // Include the auction status
+          })),
+        };
+      });
+
+      res.status(200).json(eventsWithAuctionStatus);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
 };
 
 // Read a single Event by ID

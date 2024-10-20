@@ -150,6 +150,7 @@ const AuctionBiddingPage = () => {
     }
 
     try {
+        setLoading(true);
       const response = await axios.post(
         `http://localhost:3000/api/events/${eventId}/auctions/${auctionId}/bids`,
         {
@@ -158,7 +159,6 @@ const AuctionBiddingPage = () => {
           userId:userId
         }
       );
-      setLoading(true);
       setAuction(response.data);
       setBidAmount('');
       setSnackbar({
