@@ -68,9 +68,9 @@ export default function ProfilePage() {
     }
   };
 
-  const handleCompleteProfile = () => {
-    navigate('/complete-profile');
-  };
+  // const handleCompleteProfile = () => {
+  //   navigate('/complete-profile');
+  // };
 
   const currentUser = userDetails || user;
 
