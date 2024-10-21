@@ -68,20 +68,14 @@ export default function ProfilePage() {
     }
   };
 
-  const handleCompleteProfile = () => {
-    navigate('/complete-profile');
-  };
+
 
   const currentUser = userDetails || user;
 
   return (
     <Container maxWidth="md">
       <Paper elevation={3} sx={{ mt: 4, p: 4, borderRadius: 2 }}>
-        {!currentUser?.isProfileComplete && (
-          <Alert severity="info" sx={{ mb: 4 }}>
-            Please complete your profile to become verified and access all features.
-          </Alert>
-        )}
+        
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={4}>
           <Box display="flex" alignItems="center">
             <Box position="relative">
@@ -112,23 +106,14 @@ export default function ProfilePage() {
             <Box>
               <Typography variant="h4" fontWeight="bold" display="flex" alignItems="center">
                 {currentUser?.username}
-                {currentUser?.isProfileComplete && (
-                  <VerifiedIcon sx={{ ml: 1, color: 'primary.main' }} />
-                )}
+                
               </Typography>
               <Typography variant="subtitle1" color="text.secondary">
                 {currentUser?.email}
               </Typography>
             </Box>
           </Box>
-          {currentUser?.isProfileComplete && (
-            <Chip
-              icon={<VerifiedIcon />}
-              label="Verified User"
-              color="primary"
-              variant="outlined"
-            />
-          )}
+          
         </Box>
 
         <Divider sx={{ my: 3 }} />
@@ -226,14 +211,6 @@ export default function ProfilePage() {
             onClick={handleLogout}
           >
             Logout
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<EditIcon />}
-            onClick={handleCompleteProfile}
-          >
-            Complete Profile
           </Button>
         </Box>
       </Paper>
