@@ -21,7 +21,6 @@ import { useAuth } from "../context/AuthContext";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// Validation schemas
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required"),
   password: Yup.string().required("Required"),
@@ -34,9 +33,8 @@ const RegisterSchema = Yup.object().shape({
     .min(8, "Password must be at least 8 characters")
     .required("Required"),
   confirmPassword: Yup.string()
-    .oneOf([Yup.ref("password"), null], "Passwords must match")
-    .required("Required"),
-  //   role: Yup.string().oneOf(['eventhost', 'sponsor'], 'Invalid role').required('Required'),
+    .oneOf([Yup.ref('password'), null], 'Passwords must match')
+    .required('Required'),
 });
 
 const AuthPage = () => {
@@ -83,8 +81,8 @@ const AuthPage = () => {
         values
       );
       console.log(response.data.token);
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("userId", response.data.userId);
+      localStorage.setItem('authToken', response.data.token);
+      localStorage.setItem('userId', response.data.userId);
       login();
       toast.success("Registration successful!"); // Success toast
       navigate("/");
@@ -127,6 +125,7 @@ const AuthPage = () => {
             Welcome to EventHive
           </Typography>
         </Box>
+
 
         <ToastContainer />
 

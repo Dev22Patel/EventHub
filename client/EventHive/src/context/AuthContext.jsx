@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('authToken');
         if (token) {
             setIsAuthenticated(true);
             getHostedEvents();
@@ -25,13 +25,13 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         setIsAuthenticated(false);
-        localStorage.removeItem('token');
+        localStorage.removeItem('authToken');
         setHostedEvents([]);
         setSponsoredEvents([]);
     };
 
     const getHostedEvents = async () => {
-        const userId = localStorage.getItem('userId'); // Ensure this key matches your stored user ID
+        const userId = localStorage.getItem('userId');
         if (userId) {
             try {
                 const response = await axios.get(`http://localhost:3000/api/events/hosted/${userId}`);
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const getSponsoredEvents = async () => {
-        const userId = localStorage.getItem('userId'); // Ensure this key matches your stored user ID
+        const userId = localStorage.getItem('userId');
         if (userId) {
             try {
                 const response = await axios.get(`http://localhost:3000/api/events/sponsored/${userId}`);
@@ -61,7 +61,6 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
-// Custom hook for easy access to the AuthContext
 export const useAuth = () => {
     return useContext(AuthContext);
 };

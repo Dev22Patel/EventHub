@@ -150,7 +150,7 @@ const AuctionBiddingPage = () => {
     }
 
     try {
-        setLoading(true);
+      setLoading(true);
       const response = await axios.post(
         `http://localhost:3000/api/events/${eventId}/auctions/${auctionId}/bids`,
         {
@@ -251,7 +251,7 @@ const AuctionBiddingPage = () => {
 
         <Grid container spacing={4}>
           <Grid item xs={12} md={8}>
-            <Paper elevation={3} sx={{ p: 4, mb: 4, borderRadius: 2 }}>
+            <Paper elevation={8} sx={{ p: 4, mb: 4, borderRadius: 2 }}>
               <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
                 {auction.itemName}
               </Typography>
