@@ -9,7 +9,6 @@ import { useAuth } from '../context/AuthContext';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Validation schemas
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email('Invalid email').required('Required'),
   password: Yup.string().required('Required'),
@@ -22,7 +21,6 @@ const RegisterSchema = Yup.object().shape({
   confirmPassword: Yup.string()
     .oneOf([Yup.ref('password'), null], 'Passwords must match')
     .required('Required'),
-//   role: Yup.string().oneOf(['eventhost', 'sponsor'], 'Invalid role').required('Required'),
 });
 
 const AuthPage = () => {
@@ -38,10 +36,10 @@ const AuthPage = () => {
     try {
       const response = await axios.post('http://localhost:3000/api/auth/login', values);
       console.log(response);
-      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('authToken', response.data.token);
       localStorage.setItem('userId', response.data.userId);
       login();
-      toast.success('Login successful!');
+      toast.success(response.data.message);
       navigate('/');
     } catch (error) {
       toast.error(error.response?.data?.message || 'An error occurred during login');
@@ -53,7 +51,7 @@ const AuthPage = () => {
     try {
       const response = await axios.post('http://localhost:3000/api/auth/register', values);
       console.log(response.data.token);
-      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('authToken', response.data.token);
       localStorage.setItem('userId', response.data.userId);
       login();
       toast.success('Registration successful!'); // Success toast
@@ -82,7 +80,7 @@ const AuthPage = () => {
             Welcome to EventHive
           </Typography>
         </Box>
-        
+
         <ToastContainer />
 
         {isAuthenticated ? (

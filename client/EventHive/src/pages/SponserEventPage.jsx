@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Typography, Container, Grid, Box, CircularProgress } from '@mui/material';
+import { Typography, Container, Grid, Box, CircularProgress, Paper } from '@mui/material';
 import { CalendarToday, LocationOn, Gavel } from '@mui/icons-material';
 
 const EventCard = ({ event }) => {
@@ -18,33 +18,35 @@ const EventCard = ({ event }) => {
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
-      <Link to={`/events/${event._id}`} className="block h-full no-underline">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden h-full flex flex-col">
-          {/* Remove the image section entirely */}
-          <div className="p-4 flex-grow">
-            <h2 className="text-xl font-bold text-black mb-1">{event.title}</h2>
-            <motion.p
-              className="text-sm text-gray-600 mb-2"
+      <Link to={`/events/${event._id}`} style={{ textDecoration: 'none' }}>
+        <Paper elevation={3} sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: 'background.paper', borderRadius: 2 }}>
+          <Box sx={{ p: 2, flexGrow: 1 }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 1 }}>
+              {event.title}
+            </Typography>
+            <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: isHovered ? 1 : 0, height: isHovered ? 'auto' : 0 }}
               transition={{ duration: 0.3 }}
             >
-              {event.description}
-            </motion.p>
-            <div className="flex items-center mb-2">
-              <CalendarToday className="w-4 h-4 mr-2 text-gray-500" />
-              <Typography variant="body2" className="text-gray-600">
+              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                {event.description}
+              </Typography>
+            </motion.div>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <CalendarToday sx={{ fontSize: 'small', mr: 1, color: 'text.secondary' }} />
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 {new Date(event.date).toLocaleDateString()}
               </Typography>
-            </div>
-            <div className="flex items-center">
-              <LocationOn className="w-4 h-4 mr-2 text-gray-500" />
-              <Typography variant="body2" className="text-gray-600">
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <LocationOn sx={{ fontSize: 'small', mr: 1, color: 'text.secondary' }} />
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 {event.location || 'Virtual Event'}
               </Typography>
-            </div>
-          </div>
-          <div className="px-4 pb-4">
+            </Box>
+          </Box>
+          <Box sx={{ px: 2, pb: 2 }}>
             <AnimatePresence>
               {isHovered && (
                 <motion.div
@@ -52,15 +54,18 @@ const EventCard = ({ event }) => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 20 }}
                   transition={{ duration: 0.2 }}
-                  className="bg-black text-white px-4 py-2 rounded-full inline-flex items-center"
                 >
-                  <Gavel className="w-4 h-4 mr-2" />
-                  <span>{event.auctions.length} Auction{event.auctions.length !== 1 ? 's' : ''}</span>
+                  <Paper sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', px: 2, py: 1, borderRadius: 'full', display: 'inline-flex', alignItems: 'center' }}>
+                    <Gavel sx={{ fontSize: 'small', mr: 1 }} />
+                    <Typography variant="body2">
+                      {event.auctions.length} Auction{event.auctions.length !== 1 ? 's' : ''}
+                    </Typography>
+                  </Paper>
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
-        </div>
+          </Box>
+        </Paper>
       </Link>
     </motion.div>
   );
@@ -104,9 +109,7 @@ const SponsorEventsPage = () => {
     );
   }
 
-  // Separate events into ongoing and finished
-  // Separate events into ongoing and finished based on auction status
-const ongoingEvents = events.filter(event =>
+  const ongoingEvents = events.filter(event =>
     event.auctions.some(auction => auction.status !== 'finished')
   );
 
@@ -115,15 +118,14 @@ const ongoingEvents = events.filter(event =>
   );
 
   return (
-    <Container maxWidth="lg" className="mt-8 mb-8">
-      <Typography variant="h3" gutterBottom align="center" className="font-bold mb-8">
+    <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
+      <Typography variant="h3" gutterBottom align="center" sx={{ fontWeight: 'bold', mb: 8, color: 'text.primary' }}>
         Sponsorship Opportunities
       </Typography>
 
       <Grid container spacing={4}>
-        {/* Display ongoing events */}
         <Grid item xs={12}>
-          <Typography variant="h4" gutterBottom align="center" className="font-bold mb-4">
+          <Typography variant="h4" gutterBottom align="center" sx={{ fontWeight: 'bold', mb: 4, color: 'text.primary' }}>
             Ongoing Events
           </Typography>
         </Grid>
@@ -134,10 +136,9 @@ const ongoingEvents = events.filter(event =>
         ))}
       </Grid>
 
-      {/* Divider between ongoing and finished events */}
       <Grid container spacing={4} sx={{ mt: 4 }}>
         <Grid item xs={12}>
-          <Typography variant="h4" gutterBottom align="center" className="font-bold mb-4">
+          <Typography variant="h4" gutterBottom align="center" sx={{ fontWeight: 'bold', mb: 4, color: 'text.primary' }}>
             Finished Events
           </Typography>
         </Grid>
@@ -149,7 +150,7 @@ const ongoingEvents = events.filter(event =>
           ))
         ) : (
           <Grid item xs={12}>
-            <Typography variant="body1" align="center">
+            <Typography variant="body1" align="center" sx={{ color: 'text.secondary' }}>
               No finished events to display.
             </Typography>
           </Grid>
