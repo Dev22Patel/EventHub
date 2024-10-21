@@ -50,10 +50,10 @@ const corsOption = {
 
 app.use(cors(corsOption));
 // Routes
+app.use('/api/users',userRoutes)
 app.use('/api/eventhosts', eventHostRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/auctions', auctionRoutes);
 app.use('/api/sponsors', sponsorRoutes);
 app.use('/api/auth',authrouter);
 app.use('/api', auctionRoutes);
-app.use('/api/users',userRoutes)

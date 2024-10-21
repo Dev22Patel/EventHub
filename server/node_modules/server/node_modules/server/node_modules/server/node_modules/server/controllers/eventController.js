@@ -111,18 +111,32 @@ exports.updateEvent = async (req, res) => {
 
 // Delete an Event
 exports.deleteEvent = async (req, res) => {
-  try {
-    const event = await Event.findByIdAndDelete(req.params.id);
-    if (!event) return res.status(404).json({ message: 'Event not found' });
+    try {
+      // Find the event first to get its details
+      const event = await Event.findById(req.params.id);
+      if (!event) {
+        return res.status(404).json({ message: 'Event not found' });
+      }
 
-    // Remove event reference from the host
-    await EventHost.findByIdAndUpdate(event.host, { $pull: { events: event._id } });
+      // Delete all associated auctions
+      if (event.auctions && event.auctions.length > 0) {
+        await Auction.deleteMany({ _id: { $in: event.auctions } });
+      }
 
-    res.status(204).send();
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+      // Remove event reference from the host's events array
+      await User.findByIdAndUpdate(event.host, {
+        $pull: { events: event._id }
+      });
+
+      // Finally delete the event
+      await Event.findByIdAndDelete(req.params.id);
+
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      res.status(500).json({ error: error.message });
+    }
+  };
 
 // Add an auction to an event
 exports.addAuction = async (req, res) => {

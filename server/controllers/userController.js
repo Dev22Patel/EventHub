@@ -3,10 +3,10 @@ const User = require("../models/user-model");
 
 exports.getAllUsers = async (req, res) => {
     try {
-        const users = await User.find()
-            .select("-password") 
-            .populate('events') 
-            .populate('participatedAuctions'); 
+        const users = await User.find();
+            // .select("-password")
+            // .populate('events')
+            // .populate('participatedAuctions');
 
         const usersData = users.map(user => user.toObject());
 

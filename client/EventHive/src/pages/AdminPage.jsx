@@ -46,9 +46,10 @@ const AdminPage = () => {
       try {
         const response = await axios.get("http://localhost:3000/api/events/", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
         });
+        console.log(response.data);
         setEvents(response.data);
       } catch (error) {
         toast.error("Error fetching events");
@@ -61,11 +62,7 @@ const AdminPage = () => {
 
   const handleDeleteUser = async (userId) => {
     try {
-      await axios.delete(`http://localhost:3000/api/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      await axios.delete(`http://localhost:3000/api/users/${userId}`);
       setUsers(users.filter((user) => user._id !== userId));
       toast.success("User deleted successfully");
     } catch (error) {
@@ -75,11 +72,19 @@ const AdminPage = () => {
 
   const handleDeleteEvent = async (eventId) => {
     try {
-      await axios.delete(`http://localhost:3000/api/events/${eventId}`);
-      setEvents(events.filter((event) => event._id !== eventId));
-      toast.success("Event deleted successfully");
+      const response = await axios.delete(`http://localhost:3000/api/events/${eventId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
+
+      if (response.status === 204) {
+        setEvents(events.filter((event) => event._id !== eventId));
+        toast.success("Event deleted successfully");
+      }
     } catch (error) {
-      toast.error("Error deleting event");
+      console.error('Error deleting event:', error);
+      toast.error(error.response?.data?.message || "Error deleting event");
     }
   };
 
@@ -167,14 +172,14 @@ const AdminPage = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {events.map((event) => (
-                    <TableRow key={event._id}>
-                      <TableCell>{event.title}</TableCell>
-                      <TableCell>{event.description}</TableCell>
+                  {users.map((event) => (
+                    <TableRow key={event._id} >
+                      <TableCell>{event.username}</TableCell>
+                      <TableCell>{event.email}</TableCell>
                       <TableCell>
                         <IconButton
                           color="error"
-                          onClick={() => handleDeleteEvent(event._id)}
+                          onClick={() => handleDeleteUser(event._id)}
                         >
                           <DeleteIcon />
                         </IconButton>
