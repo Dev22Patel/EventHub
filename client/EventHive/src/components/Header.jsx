@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -14,6 +14,8 @@ import { useAuth } from "../context/AuthContext";
 
 export default function Header() {
   const { isAuthenticated, setIsAuthenticated , user, isAdmin, setIsAdmin } = useAuth();
+  let imagep=null;
+  const [profile,setProfile] = useState(imagep);
   const handleLogout = () => {
     // localStorage.removeItem("token");
     setIsAdmin(false);
@@ -21,6 +23,20 @@ export default function Header() {
     // logout();
     navigate("/auth");
   };
+  useEffect(()=>{
+    imagep=localStorage.getItem('profileImage');
+    setProfile(imagep);
+    return ()=>{
+      clearInterval(intId);
+    }
+  },[profile]);
+  if(localStorage.getItem('profileImage')){
+    imagep=localStorage.getItem('profileImage');
+  }
+  let intId=setInterval(()=>{
+    let imagep=localStorage.getItem('profileImage');
+    setProfile(imagep);
+  },1000);
 
   if (isAdmin) {
     return (
@@ -120,7 +136,7 @@ export default function Header() {
           ) : (
             <Link to="/profile" style={{ textDecoration: "none" }}>
               <IconButton sx={{ ml: 1 }}>
-                <Avatar src={user?.avatarUrl} alt={user?.name}>
+                <Avatar src={ profile!=null ? profile : undefined} alt={user?.name}>
                   {user?.name?.charAt(0)}
                 </Avatar>
               </IconButton>

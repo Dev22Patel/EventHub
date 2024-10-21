@@ -5,12 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Info, X, Search, Mail, Tag } from 'lucide-react'
 
 const sponsors = [
-  { id: 1, name: 'TechCorp', description: 'Leading technology solutions provider', logo: '/placeholder.svg?height=100&width=100', email: 'contact@techcorp.com', type: 'Technology' },
-  { id: 2, name: 'EcoGreen', description: 'Sustainable energy innovator', logo: '/placeholder.svg?height=100&width=100', email: 'info@ecogreen.com', type: 'Energy' },
-  { id: 3, name: 'HealthPlus', description: 'Advanced healthcare systems', logo: '/placeholder.svg?height=100&width=100', email: 'support@healthplus.com', type: 'Healthcare' },
-  { id: 4, name: 'FinTech Solutions', description: 'Innovative financial technology', logo: '/placeholder.svg?height=100&width=100', email: 'hello@fintechsolutions.com', type: 'Finance' },
-  { id: 5, name: 'EduLearn', description: 'Cutting-edge educational platforms', logo: '/placeholder.svg?height=100&width=100', email: 'info@edulearn.com', type: 'Education' },
-  { id: 6, name: 'AeroSpace', description: 'Next-generation aerospace technology', logo: '/placeholder.svg?height=100&width=100', email: 'contact@aerospace.com', type: 'Aerospace' },
+  { id: 1, name: 'TechCorp', description: 'Leading technology solutions provider', logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTsUTHAz2ss7DkM30-1UvfvZTbYhBQIAOLoMw&s?height=100&width=100', email: 'contact@techcorp.com', type: 'Technology' },
+  { id: 2, name: 'EcoGreen', description: 'Sustainable energy innovator', logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSSudyQYExXpcQT-Su_H8MyHBwvloNu0iP0g&s?height=100&width=100', email: 'info@ecogreen.com', type: 'Energy' },
+  { id: 3, name: 'HealthPlus', description: 'Advanced healthcare systems', logo: 'https://img.freepik.com/premium-vector/medical-health-plus-cross-logo-design_375081-810.jpg?height=100&width=100', email: 'support@healthplus.com', type: 'Healthcare' },
+  { id: 4, name: 'FinTech Solutions', description: 'Innovative financial technology', logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrpYbBLNxB7kVKd4TXMsVGROJSXKYi4ScBFg&s?height=100&width=100', email: 'hello@fintechsolutions.com', type: 'Finance' },
+  { id: 5, name: 'EduLearn', description: 'Cutting-edge educational platforms', logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvdWr2vUxgRJE2x6oyty7NOX1_jPW7LvXHRw&s?height=100&width=100', email: 'info@edulearn.com', type: 'Education' },
+  { id: 6, name: 'AeroSpace', description: 'Next-generation aerospace technology', logo: 'https://www.shutterstock.com/image-vector/abstract-initial-letter-aerospace-logo-600nw-2418709995.jpg?height=100&width=100', email: 'contact@aerospace.com', type: 'Aerospace' },
 ]
 
 export default function EnhancedSponsorsPage() {
