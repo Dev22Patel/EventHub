@@ -129,11 +129,17 @@ const SponsorEventsPage = () => {
             Ongoing Events
           </Typography>
         </Grid>
-        {ongoingEvents.map((event) => (
+        {ongoingEvents.length > 0 ?
+        ongoingEvents.map((event) => (
           <Grid item key={event._id} xs={12} sm={6} md={4}>
             <EventCard event={event} />
           </Grid>
-        ))}
+        )) : <Grid item xs={12}>
+            <Typography variant="body1" align="center" sx={{ color: 'text.secondary' }}>
+              No Ongoing events to display.
+            </Typography>
+          </Grid>
+        }
       </Grid>
 
       <Grid container spacing={4} sx={{ mt: 4 }}>

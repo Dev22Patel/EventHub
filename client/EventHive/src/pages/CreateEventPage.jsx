@@ -15,12 +15,12 @@ import {
   Step,
   StepLabel,
   Paper,
-  IconButton
+  IconButton,
+  Alert
 } from '@mui/material';
 import {
   ChevronLeft,
   ChevronRight,
-  Image as ImageIcon,
   AttachMoney,
   AccessTime,
   Add as AddIcon,
@@ -31,13 +31,13 @@ import { useNavigate } from 'react-router-dom';
 
 const CreateEventPage = () => {
   const [activeStep, setActiveStep] = useState(0);
+  const [formErrors, setFormErrors] = useState({});
   const [eventData, setEventData] = useState({
     title: '',
     description: '',
     eventType: 'in-person',
     location: '',
     date: '',
-    image: null,
   });
   const [auctions, setAuctions] = useState([{
     itemName: '',
@@ -50,9 +50,36 @@ const CreateEventPage = () => {
   const steps = ['Event Details', 'Auction Details'];
   const navigate = useNavigate();
 
+  const validateFirstPage = () => {
+    const errors = {};
+
+    if (!eventData.title.trim()) {
+      errors.title = 'Event name is required';
+    }
+
+    if (!eventData.description.trim()) {
+      errors.description = 'Event description is required';
+    }
+
+    if (eventData.eventType === 'in-person' && !eventData.location.trim()) {
+      errors.location = 'Location is required for in-person events';
+    }
+
+    if (!eventData.date) {
+      errors.date = 'Event date is required';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleEventChange = (e) => {
     const { name, value } = e.target;
     setEventData(prev => ({ ...prev, [name]: value }));
+    // Clear error for the field being changed
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
   const handleAuctionChange = (index, e) => {
@@ -72,32 +99,35 @@ const CreateEventPage = () => {
       duration: '',
     }]);
   };
+
   const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    if (activeStep === 0) {
+      const isValid = validateFirstPage();
+      if (isValid) {
+        setActiveStep(1);
+      }
+    }
   };
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
+
   const handleRemoveAuction = (index) => {
     setAuctions(auctions.filter((_, i) => i !== index));
   };
 
-//   const handleImageUpload = (event) => {
-//     const file = event.target.files[0];
-//     if (file) {
-//       const reader = new FileReader();
-//       reader.onloadend = () => {
-//         setEventData(prev => ({ ...prev, image: reader.result }));
-//       };
-//       reader.readAsDataURL(file);
-//     }
-//   };
+  const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = localStorage.getItem('userId');
-    console.log(userId);
     if (!userId) {
       alert('You must be logged in to create an event.');
       return;
@@ -109,12 +139,10 @@ const handleSubmit = async (e) => {
     Object.keys(eventData).forEach(key => {
       if (key === 'date') {
         formData.append(key, new Date(eventData[key]).toISOString());
-      }  else {
+      } else {
         formData.append(key, eventData[key]);
       }
     });
-
-
 
     // Append user ID as the event host
     formData.append('host', userId);
@@ -129,11 +157,6 @@ const handleSubmit = async (e) => {
     }));
 
     formData.append('auctions', JSON.stringify(formattedAuctions));
-
-    // Log FormData contents for debugging
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
 
     try {
       const response = await axios.post('http://localhost:3000/api/events/createEvent', formData, {
@@ -176,6 +199,8 @@ const handleSubmit = async (e) => {
                   value={eventData.title}
                   onChange={handleEventChange}
                   required
+                  error={!!formErrors.title}
+                  helperText={formErrors.title}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -189,6 +214,8 @@ const handleSubmit = async (e) => {
                   value={eventData.description}
                   onChange={handleEventChange}
                   required
+                  error={!!formErrors.description}
+                  helperText={formErrors.description}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -215,6 +242,8 @@ const handleSubmit = async (e) => {
                     value={eventData.location}
                     onChange={handleEventChange}
                     required
+                    error={!!formErrors.location}
+                    helperText={formErrors.location}
                   />
                 </Grid>
               )}
@@ -229,13 +258,16 @@ const handleSubmit = async (e) => {
                   InputLabelProps={{
                     shrink: true,
                   }}
+                  inputProps={{
+                    min: getCurrentDate(),
+                  }}
                   required
+                  error={!!formErrors.date}
+                  helperText={formErrors.date}
                 />
               </Grid>
             </Grid>
           )}
-
-
 
           {activeStep === 1 && (
             <>
@@ -313,11 +345,13 @@ const handleSubmit = async (e) => {
                       required
                     />
                   </Grid>
-                  <Grid item xs={12}>
-                    <IconButton onClick={() => handleRemoveAuction(index)} color="error">
-                      <DeleteIcon />
-                    </IconButton>
-                  </Grid>
+                  {auctions.length > 1 && (
+                    <Grid item xs={12}>
+                      <IconButton onClick={() => handleRemoveAuction(index)} color="error">
+                        <DeleteIcon />
+                      </IconButton>
+                    </Grid>
+                  )}
                 </Grid>
               ))}
               <Button
