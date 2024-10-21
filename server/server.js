@@ -8,6 +8,8 @@ const eventRoutes = require('./router/eventRoutes');
 const auctionRoutes = require('./router/auctionRoutes');
 const sponsorRoutes = require('./router/sponsorRoutes');
 const authrouter = require('./router/auth-router');
+const userRoutes = require('./router/userRoutes');
+
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -54,3 +56,4 @@ app.use('/api/auctions', auctionRoutes);
 app.use('/api/sponsors', sponsorRoutes);
 app.use('/api/auth',authrouter);
 app.use('/api', auctionRoutes);
+app.use('/api/users',userRoutes)

@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [hostedEvents, setHostedEvents] = useState([]);
     const [sponsoredEvents, setSponsoredEvents] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -54,7 +55,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, login, logout, hostedEvents, sponsoredEvents }}>
+        <AuthContext.Provider value={{ isAuthenticated, login, logout,isAdmin,setIsAdmin, hostedEvents, sponsoredEvents }}>
             {children}
         </AuthContext.Provider>
     );
