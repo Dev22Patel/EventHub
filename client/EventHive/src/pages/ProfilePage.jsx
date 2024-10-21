@@ -32,6 +32,11 @@ import { useNavigate } from 'react-router-dom';
 export default function ProfilePage() {
   const { user, hostedEvents, sponsoredEvents, logout, updateProfileImage } = useAuth();
   const [tabValue, setTabValue] = useState(0);
+  let imagep=null;
+  if(localStorage.getItem('profileImage')){
+    imagep=localStorage.getItem('profileImage');
+  }
+  const [profileImage, setProfileImage] = useState(imagep);
   const [userDetails, setUserDetails] = useState(null);
   const navigate = useNavigate();
   const userId = localStorage.getItem("userId");
@@ -64,7 +69,17 @@ export default function ProfilePage() {
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      await updateProfileImage(file);
+      if (file) {
+        const reader = new FileReader();
+  
+        reader.onloadend = () => {
+          const base64String = reader.result;
+          localStorage.setItem('profileImage', base64String); // Save image in localStorage
+          setProfileImage(base64String); // Update the local state with the new image
+        };
+  
+        reader.readAsDataURL(file); // Convert image to base64 string
+      }
     }
   };
 
@@ -80,7 +95,7 @@ export default function ProfilePage() {
           <Box display="flex" alignItems="center">
             <Box position="relative">
               <Avatar
-                src={currentUser?.avatarUrl}
+                src={profileImage!=null ? profileImage : (currentUser?.avatarUrl)}
                 alt={currentUser?.name}
                 sx={{ width: 120, height: 120, mr: 3 }}
               />
