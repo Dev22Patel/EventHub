@@ -3,7 +3,7 @@ const app = express();
 const router = require("./router/auth-router")
 const connectDb = require("./utils/db");
 require("dotenv").config();
-const PORT= process.env.PORT || 3000;
+const PORT= process.env.PORT || 10000;
 const eventHostRoutes = require('./router/eventHostRoutes');
 const eventRoutes = require('./router/eventRoutes');
 const auctionRoutes = require('./router/auctionRoutes');
