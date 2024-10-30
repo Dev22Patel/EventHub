@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const URI = "mongodb://localhost:27017/temp";
+require("dotenv").config();
+const URI = process.env.DATABASE_URL;
 // mongoose.connect(URI);
 
 const connectDb = async () => {
