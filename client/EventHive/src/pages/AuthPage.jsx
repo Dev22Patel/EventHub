@@ -101,7 +101,7 @@ const AuthPage = () => {
     toast.success("Logged out successfully!");
     navigate("/");
   };
-  
+
   return (
     <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
       <Paper
@@ -192,7 +192,7 @@ const AuthPage = () => {
                     >
                       Sign In
                     </Button>
-                    <Box sx={{ textAlign: "center" }}>
+                    {/* <Box sx={{ textAlign: "center" }}>
                       <Link
                         component="button"
                         variant="body2"
@@ -200,7 +200,7 @@ const AuthPage = () => {
                       >
                         Forgot Password?
                       </Link>
-                    </Box>
+                    </Box> */}
                   </Form>
                 )}
               </Formik>
