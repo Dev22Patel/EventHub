@@ -6,6 +6,7 @@ const URI = process.env.DATABASE_URL || "mongodb+srv://notrealdev2211:Devpatel20
 const connectDb = async () => {
   try {
     await mongoose.connect(URI);
+    console.log(URI);
     console.log("Databse connection Succesful");
   } catch (error) {
     console.log("Databse connection failed");

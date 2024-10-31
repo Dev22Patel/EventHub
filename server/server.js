@@ -10,7 +10,7 @@ const sponsorRoutes = require('./router/sponsorRoutes');
 const authrouter = require('./router/auth-router');
 const userRoutes = require('./router/userRoutes');
 const cors = require('cors');
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 
 connectDb().then(()=>{
     app.listen(PORT, () => {
