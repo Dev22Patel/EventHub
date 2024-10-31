@@ -80,7 +80,7 @@ const SponsorEventsPage = () => {
     const fetchEvents = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:3000/api/events');
+        const response = await axios.get('https://eventhub-2dqv.onrender.com/api/events');
         setEvents(response.data);
         console.log(response.data);
         setLoading(false);
