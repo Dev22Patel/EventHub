@@ -44,7 +44,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/auth/user/${userId}`)
+        const response = await axios.get(`https://eventhub-2dqv.onrender.com/api/auth/user/${userId}`)
 
         if (response.status !== 200) {
           throw new Error('Failed to fetch user details');
@@ -71,13 +71,13 @@ export default function ProfilePage() {
     if (file) {
       if (file) {
         const reader = new FileReader();
-  
+
         reader.onloadend = () => {
           const base64String = reader.result;
           localStorage.setItem('profileImage', base64String); // Save image in localStorage
           setProfileImage(base64String); // Update the local state with the new image
         };
-  
+
         reader.readAsDataURL(file); // Convert image to base64 string
       }
     }
@@ -90,7 +90,7 @@ export default function ProfilePage() {
   return (
     <Container maxWidth="md">
       <Paper elevation={3} sx={{ mt: 4, p: 4, borderRadius: 2 }}>
-        
+
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={4}>
           <Box display="flex" alignItems="center">
             <Box position="relative">
@@ -121,14 +121,14 @@ export default function ProfilePage() {
             <Box>
               <Typography variant="h4" fontWeight="bold" display="flex" alignItems="center">
                 {currentUser?.username}
-                
+
               </Typography>
               <Typography variant="subtitle1" color="text.secondary">
                 {currentUser?.email}
               </Typography>
             </Box>
           </Box>
-          
+
         </Box>
 
         <Divider sx={{ my: 3 }} />

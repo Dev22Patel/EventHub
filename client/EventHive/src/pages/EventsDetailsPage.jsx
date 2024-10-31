@@ -31,13 +31,13 @@ const EventDetailsPage = () => {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const eventResponse = await axios.get(`http://localhost:3000/api/events/${eventId}`);
+        const eventResponse = await axios.get(`https://eventhub-2dqv.onrender.com/api/events/${eventId}`);
         setEvent(eventResponse.data);
 
         const auctionPromises = eventResponse.data.auctions.map((auctionId) =>
-          axios.get(`http://localhost:3000/api/auctions/${auctionId}`)
+          axios.get(`https://eventhub-2dqv.onrender.com/api/auctions/${auctionId}`)
         );
-        
+
         const auctionResponses = await Promise.all(auctionPromises);
         console.log(auctionResponses);
         const auctionData = auctionResponses.map((res) => res.data);

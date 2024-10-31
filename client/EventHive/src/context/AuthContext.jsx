@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', token);
     };
 
-    
+
 
     const logout = () => {
         setIsAuthenticated(false);
@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
         const userId = localStorage.getItem('userId');
         if (userId) {
             try {
-                const response = await axios.get(`http://localhost:3000/api/events/hosted/${userId}`);
+                const response = await axios.get(`https://eventhub-2dqv.onrender.com/api/events/hosted/${userId}`);
                 setHostedEvents(response.data);
             } catch (error) {
                 console.error('Error fetching hosted events:', error);
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
         const userId = localStorage.getItem('userId');
         if (userId) {
             try {
-                const response = await axios.get(`http://localhost:3000/api/events/sponsored/${userId}`);
+                const response = await axios.get(`https://eventhub-2dqv.onrender.com/api/events/sponsored/${userId}`);
                 setSponsoredEvents(response.data);
             } catch (error) {
                 console.error('Error fetching sponsored events:', error);

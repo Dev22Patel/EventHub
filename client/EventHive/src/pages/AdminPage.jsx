@@ -34,7 +34,7 @@ const AdminPage = () => {
 
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/users");
+        const response = await axios.get("https://eventhub-2dqv.onrender.com/api/users");
         setUsers(response.data);
         console.log(response.data);
       } catch (error) {
@@ -44,7 +44,7 @@ const AdminPage = () => {
 
     const fetchEvents = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/events/", {
+        const response = await axios.get("https://eventhub-2dqv.onrender.com/api/events/", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
@@ -62,7 +62,7 @@ const AdminPage = () => {
 
   const handleDeleteUser = async (userId) => {
     try {
-      await axios.delete(`http://localhost:3000/api/users/${userId}`);
+      await axios.delete(`https://eventhub-2dqv.onrender.com/api/users/${userId}`);
       setUsers(users.filter((user) => user._id !== userId));
       toast.success("User deleted successfully");
     } catch (error) {
@@ -72,7 +72,7 @@ const AdminPage = () => {
 
   const handleDeleteEvent = async (eventId) => {
     try {
-      const response = await axios.delete(`http://localhost:3000/api/events/${eventId}`, {
+      const response = await axios.delete(`https://eventhub-2dqv.onrender.com/api/events/${eventId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },

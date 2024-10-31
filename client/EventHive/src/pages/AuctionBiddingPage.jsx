@@ -63,7 +63,7 @@ const AuctionBiddingPage = () => {
       if (!eventId || !auctionId) {
         throw new Error("Missing eventId or auctionId");
       }
-      const response = await axios.get(`http://localhost:3000/api/events/${eventId}/auctions/${auctionId}`);
+      const response = await axios.get(`https://eventhub-2dqv.onrender.com/api/events/${eventId}/auctions/${auctionId}`);
       const auctionData = response.data;
 
       const endTime = calculateEndTime(auctionData);
@@ -152,7 +152,7 @@ const AuctionBiddingPage = () => {
     try {
       setLoading(true);
       const response = await axios.post(
-        `http://localhost:3000/api/events/${eventId}/auctions/${auctionId}/bids`,
+        `https://eventhub-2dqv.onrender.com/api/events/${eventId}/auctions/${auctionId}/bids`,
         {
           amount: bidAmountNum,
           id: userId,

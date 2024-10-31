@@ -159,7 +159,7 @@ const CreateEventPage = () => {
     formData.append('auctions', JSON.stringify(formattedAuctions));
 
     try {
-      const response = await axios.post('http://localhost:3000/api/events/createEvent', formData, {
+      const response = await axios.post('https://eventhub-2dqv.onrender.com/api/events/createEvent', formData, {
         headers: {
           'Content-Type': 'application/json',
         },

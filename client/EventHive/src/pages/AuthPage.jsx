@@ -54,7 +54,7 @@ const AuthPage = () => {
     } else {
       try {
         const response = await axios.post(
-          "http://localhost:3000/api/auth/login",
+          "https://eventhub-2dqv.onrender.com/api/auth/login",
           values
         );
         logout
@@ -77,7 +77,7 @@ const AuthPage = () => {
   const handleRegister = async (values, { setSubmitting }) => {
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/auth/register",
+        "https://eventhub-2dqv.onrender.com/api/auth/register",
         values
       );
       console.log(response.data.token);
