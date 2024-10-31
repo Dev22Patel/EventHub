@@ -21,7 +21,8 @@ connectDb().then(()=>{
 app.use(express.json()); // For parsing application/json
 app.use(express.urlencoded({extended:true}));
 const corsOption = {
-    origin: 'https://event-hub-topaz-seven.vercel.app/', // Corrected here
+    origin: 'https://event-hub-topaz-seven.vercel.app', // Corrected here
+    methods: ['GET','POST','PUT','DELETE'],
     credentials: true
 };
 
