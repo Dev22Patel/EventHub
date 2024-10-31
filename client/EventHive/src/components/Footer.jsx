@@ -13,17 +13,13 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import { useAuth } from '../context/AuthContext';
 
-
 const Footer = () => {
   const theme = useTheme();
   const { isAdmin } = useAuth();
 
-
-  if(isAdmin){
-    return(
-      <div></div>
-    );
-  }else{
+  if (isAdmin) {
+    return <div></div>;
+  } else {
     return (
       <Box
         sx={{
@@ -34,8 +30,8 @@ const Footer = () => {
         }}
       >
         <Container maxWidth="lg">
-          <Grid container spacing={4} justifyContent="space-between">
-            <Grid item xs={12} sm={4}>
+          <Grid container spacing={4}>
+            <Grid item xs={12} sm={6} md={4}>
               <Typography variant="h6" gutterBottom>
                 About Us
               </Typography>
@@ -44,7 +40,7 @@ const Footer = () => {
                 sponsors through our innovative auction-based platform.
               </Typography>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={6} md={4}>
               <Typography variant="h6" gutterBottom>
                 Quick Links
               </Typography>
@@ -75,7 +71,7 @@ const Footer = () => {
                 </Link>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={6} md={4}>
               <Typography variant="h6" gutterBottom>
                 Follow Us
               </Typography>
@@ -104,7 +100,6 @@ const Footer = () => {
       </Box>
     );
   }
-  
 };
 
 export default Footer;

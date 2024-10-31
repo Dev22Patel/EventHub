@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Typography, Button, Container, Grid, Card, CardContent, Box,
@@ -71,7 +70,7 @@ const LandingPage = () => {
         <Container maxWidth="md">
           <Typography
             component="h1"
-            variant={isMobile ? "h3" : "h2"}
+            variant={isMobile ? "h4" : "h2"}
             align="center"
             color="common.white"
             gutterBottom
@@ -165,132 +164,99 @@ const LandingPage = () => {
       </Container>
 
       <Box sx={{ bgcolor: 'background.paper', py: 8 }} id="hosts">
-<Container maxWidth="md">
-  <Grid container spacing={4} alignItems="center">
-    <Grid item xs={12} md={6}>
-      <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold' }}>
-        For Event Hosts
-      </Typography>
-      <Typography variant="body1" paragraph>
-        Maximize your event's potential by connecting with the perfect sponsors through our innovative auction system.
-      </Typography>
-      <Box sx={{ mt: 2 }}>
-        <Box display="flex" alignItems="center" mb={1}>
-          <TrendingUp color="primary" sx={{ mr: 1 }} />
-          <Typography variant="body1">Increase sponsorship revenue</Typography>
-        </Box>
-        <Box display="flex" alignItems="center" mb={1}>
-          <People color="primary" sx={{ mr: 1 }} />
-          <Typography variant="body1">Access a wide network of potential sponsors</Typography>
-        </Box>
-        <Box display="flex" alignItems="center">
-          <Spa color="primary" sx={{ mr: 1 }} />
-          <Typography variant="body1">Streamline the sponsorship process</Typography>
-        </Box>
-      </Box>
-    </Grid>
-    <Grid item xs={12} md={6}>
-      <Box
-        sx={{
-          width: '100%',
-          height: 300,
-          borderRadius: 2,
-          overflow: 'hidden',
-          border: '1px solid #e0e0e0',
-        }}
-      >
-        <img
-          src="https://img.freepik.com/free-vector/wedding-planner-concept-illustration_114360-2720.jpg?size=626&ext=jpg&ga=GA1.1.1170291314.1694801382&semt=ais_hybrid"
-          alt="Event Management"
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        />
-      </Box>
-    </Grid>
-  </Grid>
-</Container>
-</Box>
-
-<Box sx={{ py: 8 }} id="sponsors">
-<Container maxWidth="md">
-  <Grid container spacing={4} alignItems="center">
-    <Grid item xs={12} md={6}>
-      <Box
-        sx={{
-          width: '100%',
-          height: 300,
-          borderRadius: 2,
-          overflow: 'hidden',
-          border: '1px solid #e0e0e0',
-        }}
-      >
-        <img
-          src="https://img.freepik.com/free-vector/flat-business-deal-concept_23-2148123416.jpg?ga=GA1.1.1170291314.1694801382&semt=ais_hybrid"
-          alt="Sponsors"
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        />
-      </Box>
-    </Grid>
-    <Grid item xs={12} md={6}>
-      <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold' }}>
-        For Sponsors
-      </Typography>
-      <Typography variant="body1" paragraph>
-        Discover and secure high-value sponsorship opportunities through our transparent auction platform.
-      </Typography>
-      <Box sx={{ mt: 2 }}>
-        <Box display="flex" alignItems="center" mb={1}>
-          <EmojiEvents color="primary" sx={{ mr: 1 }} />
-          <Typography variant="body1">Bid on premium sponsorship slots</Typography>
-        </Box>
-        <Box display="flex" alignItems="center" mb={1}>
-          <CalendarToday color="primary" sx={{ mr: 1 }} />
-          <Typography variant="body1">Access a diverse range of events</Typography>
-        </Box>
-        <Box display="flex" alignItems="center">
-          <TrendingUp color="primary" sx={{ mr: 1 }} />
-          <Typography variant="body1">Maximize your marketing ROI</Typography>
-        </Box>
-      </Box>
-    </Grid>
-  </Grid>
-</Container>
-</Box>
-      {/* For Event Hosts and For Sponsors sections remain largely the same,
-         with minor styling updates to match the new theme */}
-
-      <Box sx={{ color: 'common.black', py: 10 }}>
-        <Container maxWidth="md" sx={{ textAlign: 'center' }}>
-          <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Ready to Transform Your Events?
-          </Typography>
-          <Typography variant="h6" paragraph sx={{ mb: 4 }}>
-            Join EventHive today and experience the future of event sponsorships.
-          </Typography>
-          {!isAuthenticated && (
-            <Link to='/auth' style={{ textDecoration: 'none' }}>
-              <Button
-                variant="contained"
-                color="secondary"
-                size="large"
+        <Container maxWidth="md">
+          <Grid container spacing={4} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold' }}>
+                For Event Hosts
+              </Typography>
+              <Typography variant="body1" paragraph>
+                Maximize your event's potential by connecting with the perfect sponsors through our innovative auction system.
+              </Typography>
+              <Box sx={{ mt: 2 }}>
+                <Box display="flex" alignItems="center" mb={1}>
+                  <TrendingUp color="primary" sx={{ mr: 1 }} />
+                  <Typography variant="body1">Increase sponsorship revenue</Typography>
+                </Box>
+                <Box display="flex" alignItems="center" mb={1}>
+                  <People color="primary" sx={{ mr: 1 }} />
+                  <Typography variant="body1">Access a wide network of potential sponsors</Typography>
+                </Box>
+                <Box display="flex" alignItems="center">
+                  <Spa color="primary" sx={{ mr: 1 }} />
+                  <Typography variant="body1">Streamline the sponsorship process</Typography>
+                </Box>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Box
                 sx={{
-                  mt: 2,
-                  px: 6,
-                  py: 2,
-                  fontSize: '1.2rem',
-                  fontWeight: 'bold',
-                  boxShadow: theme.shadows[5],
+                  width: '100%',
+                  height: 300,
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  border: '1px solid #e0e0e0',
                 }}
-                onClick={handleGetStarted}
               >
-                Get Started Now
-              </Button>
-            </Link>
-          )}
+                <img
+                  src="https://img.freepik.com/free-vector/wedding-planner-concept-illustration_114360-2720.jpg?size=626&ext=jpg&ga=GA1.1.1170291314.1694801382&semt=ais_hybrid"
+                  alt="Event Management"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </Box>
+            </Grid>
+          </Grid>
         </Container>
       </Box>
 
-      <DemoWalkthroughModal open={modalOpen} onClose={handleClose} />
-      <ToastContainer position="bottom-right" />
+      <Box sx={{ py: 8 }} id="sponsors">
+        <Container maxWidth="md">
+          <Grid container spacing={4} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <Box
+                sx={{
+                  width: '100%',
+                  height: 300,
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  border: '1px solid #e0e0e0',
+                }}
+              >
+                <img
+                  src="https://img.freepik.com/free-vector/flat-business-deal-concept_23-2148123416.jpg?ga=GA1.1.1170291314.1694801382&semt=ais_hybrid"
+                  alt="Sponsors"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold' }}>
+                For Sponsors
+              </Typography>
+              <Typography variant="body1" paragraph>
+                Discover and secure high-value sponsorship opportunities through our platform and gain visibility for your brand.
+              </Typography>
+              <Box sx={{ mt: 2 }}>
+                <Box display="flex" alignItems="center" mb={1}>
+                  <TrendingUp color="primary" sx={{ mr: 1 }} />
+                  <Typography variant="body1">Enhance your brand's visibility</Typography>
+                </Box>
+                <Box display="flex" alignItems="center" mb={1}>
+                  <People color="primary" sx={{ mr: 1 }} />
+                  <Typography variant="body1">Engage with diverse events</Typography>
+                </Box>
+                <Box display="flex" alignItems="center">
+                  <Spa color="primary" sx={{ mr: 1 }} />
+                  <Typography variant="body1">Streamlined bidding process</Typography>
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      <DemoWalkthroughModal open={modalOpen} handleClose={handleClose} />
+      <ToastContainer />
     </>
   );
 };
