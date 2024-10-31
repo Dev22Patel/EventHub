@@ -21,7 +21,7 @@ connectDb().then(()=>{
 app.use(express.json()); // For parsing application/json
 app.use(express.urlencoded({extended:true}));
 const corsOption = {
-    origin: 'http://localhost:5173', // Corrected here
+    origin: 'https://eventhub-2dqv.onrender.com', // Corrected here
     credentials: true
 };
 
