@@ -28,7 +28,7 @@ const corsOption = {
 
 app.use(cors(corsOption));
 // Routes
-app.options('*', cors()); // Enable preflight requests for all routes
+app.options('*', cors(corsOption)); // Enable preflight requests for all routes
 
 app.use('/api/users',userRoutes)
 app.use('/api/eventhosts', eventHostRoutes);

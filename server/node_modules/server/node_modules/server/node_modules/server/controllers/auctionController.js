@@ -86,92 +86,94 @@ exports.getAuctionForEvent = async (req, res) => {
         const auctionEndTime = new Date(auction.createdAt.getTime() + auction.duration * 60 * 1000);
 
         // Check if the auction should be marked as finished
-        if (now > auctionEndTime && auction.status === 'active') {
-            auction.status = 'finished';
-            await auction.save();
-            // Send email notification to the host
-            const host = await User.findById(auction.event.host);
-                if (!host || !host.email) {
-                    console.error('Host or host email not found');
-                    throw new Error('Host email not found');
-                }
+        // if (now > auctionEndTime && auction.status === 'active') {
+        //     auction.status = 'finished';
+        //     await auction.save();
+        //     // Send email notification to the host
+        //     const host = await User.findById(auction.event.host);
+        //         if (!host || !host.email) {
+        //             console.error('Host or host email not found');
+        //             throw new Error('Host email not found');
+        //         }
 
-                // Send emails when auction ends
-                if (auction.bids.length > 0) {
-                    // Find the winning bid
-                    const winningBid = auction.bids.reduce((prev, current) =>
-                        (prev.amount > current.amount) ? prev : current
-                    );
+        //         // Send emails when auction ends
+        //         if (auction.bids.length > 0) {
+        //             // Find the winning bid
+        //             const winningBid = auction.bids.reduce((prev, current) =>
+        //                 (prev.amount > current.amount) ? prev : current
+        //             );
 
-                    // Send email to winner
-                    const winner = await User.findById(winningBid.bidder);
-                    if (winner && winner.email) {
-                        const winnerEmailMessage = `
-                            <h2>Congratulations! You've Won the Auction!</h2>
-                            <p>You are the winning bidder for "${auction.itemName}"</p>
-                            <p>Winning Bid: $${winningBid.amount.toLocaleString()}</p>
-                            <p>Auction End Time: ${auctionEndTime.toLocaleString()}</p>
-                            <p>The event host will contact you soon with further details.</p>
-                        `;
-                        try {
-                            await sendMail(
-                                winner.email,
-                                `Auction Won - ${auction.itemName}`,
-                                winnerEmailMessage
-                            );
-                            console.log(`Email sent to winner: ${winner.email}`);
-                        } catch (emailError) {
-                            console.error('Error sending email to winner:', emailError);
-                        }
-                    } else {
-                        console.error('Winner email not found');
-                    }
+        //             // Send email to winner
+        //             const winner = await User.findById(winningBid.bidder);
+        //             if (winner && winner.email) {
+        //                 const winnerEmailMessage = `
+        //                     <h2>Congratulations! You've Won the Auction!</h2>
+        //                     <p>You are the winning bidder for "${auction.itemName}"</p>
+        //                     <p>Winning Bid: $${winningBid.amount.toLocaleString()}</p>
+        //                     <p>Auction End Time: ${auctionEndTime.toLocaleString()}</p>
+        //                     <p>The event host will contact you soon with further details.</p>
+        //                 `;
+        //                 try {
+        //                     await sendMail(
+        //                         winner.email,
+        //                         `Auction Won - ${auction.itemName}`,
+        //                         winnerEmailMessage
+        //                     );
+        //                     console.log(`Email sent to winner: ${winner.email}`);
+        //                 } catch (emailError) {
+        //                     console.error('Error sending email to winner:', emailError);
+        //                 }
+        //             } else {
+        //                 console.error('Winner email not found');
+        //             }
 
-                    // Send email to event host about auction end
-                    const hostEmailMessage = `
-                        <h2>Your Auction Has Ended!</h2>
-                        <p>The auction for "${auction.itemName}" has ended.</p>
-                        <p>Winning Bid: $${winningBid.amount.toLocaleString()}</p>
-                        <p>Winner Email: ${winner.email}</p>
-                        <p>Please contact the winner to arrange delivery/payment.</p>
-                    `;
-                    try {
-                        await sendMail(
-                            host.email,
-                            `Auction Ended - ${auction.itemName}`,
-                            hostEmailMessage
-                        );
-                        console.log(`Email sent to host: ${host.email}`);
-                    } catch (emailError) {
-                        console.error('Error sending email to host:', emailError);
-                    }
-                } else {
-                    // Send email to host if no bids were placed
-                    const noBidsMessage = `
-                        <h2>Your Auction Has Ended</h2>
-                        <p>The auction for "${auction.itemName}" has ended.</p>
-                        <p>Unfortunately, no bids were placed on this item.</p>
-                        <p>End Time: ${auctionEndTime.toLocaleString()}</p>
-                    `;
-                    try {
-                        await sendMail(
-                            host.email,
-                            `Auction Ended - ${auction.itemName}`,
-                            noBidsMessage
-                        );
-                        console.log(`Email sent to host: ${host.email}`);
-                    } catch (emailError) {
-                        console.error('Error sending email to host:', emailError);
-                    }
-                }
-        }
+        //             // Send email to event host about auction end
+        //             const hostEmailMessage = `
+        //                 <h2>Your Auction Has Ended!</h2>
+        //                 <p>The auction for "${auction.itemName}" has ended.</p>
+        //                 <p>Winning Bid: $${winningBid.amount.toLocaleString()}</p>
+        //                 <p>Winner Email: ${winner.email}</p>
+        //                 <p>Please contact the winner to arrange delivery/payment.</p>
+        //             `;
+        //             try {
+        //                 await sendMail(
+        //                     host.email,
+        //                     `Auction Ended - ${auction.itemName}`,
+        //                     hostEmailMessage
+        //                 );
+        //                 console.log(`Email sent to host: ${host.email}`);
+        //             } catch (emailError) {
+        //                 console.error('Error sending email to host:', emailError);
+        //             }
+        //         } else {
+        //             // Send email to host if no bids were placed
+        //             const noBidsMessage = `
+        //                 <h2>Your Auction Has Ended</h2>
+        //                 <p>The auction for "${auction.itemName}" has ended.</p>
+        //                 <p>Unfortunately, no bids were placed on this item.</p>
+        //                 <p>End Time: ${auctionEndTime.toLocaleString()}</p>
+        //             `;
+        //             try {
+        //                 await sendMail(
+        //                     host.email,
+        //                     `Auction Ended - ${auction.itemName}`,
+        //                     noBidsMessage
+        //                 );
+        //                 console.log(`Email sent to host: ${host.email}`);
+        //             } catch (emailError) {
+        //                 console.error('Error sending email to host:', emailError);
+        //             }
+        //         }
+        // }
 
         // Return auction data along with server time and end time
+
         res.status(200).json({
             ...auction.toObject(),
             serverTime: now,
             auctionEndTime: auctionEndTime
         });
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
