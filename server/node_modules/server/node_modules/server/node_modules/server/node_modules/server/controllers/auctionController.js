@@ -4,114 +4,114 @@ const User = require('../models/user-model');
 const { queueEmail } = require('../utils/queue');
 const { calculateLeaderboard, emitLeaderboardUpdate } = require('../utils/leaderboard');
 
-const getUsersInParallel = async (userIds) => {
-    try {
-        const users = await User.find({ _id: { $in: userIds } })
-            .select('email name')
-            .lean()
-            .exec();
-        return users.reduce((acc, user) => {
-            acc[user._id.toString()] = user;
-            return acc;
-        }, {});
-    } catch (error) {
-        console.error('Error fetching users:', error);
-        return {};
-    }
-};
+// const getUsersInParallel = async (userIds) => {
+//     try {
+//         const users = await User.find({ _id: { $in: userIds } })
+//             .select('email name')
+//             .lean()
+//             .exec();
+//         return users.reduce((acc, user) => {
+//             acc[user._id.toString()] = user;
+//             return acc;
+//         }, {});
+//     } catch (error) {
+//         console.error('Error fetching users:', error);
+//         return {};
+//     }
+// };
 
-const processAuctionEndEmails = async (auction, eventId, auctionEndTime) => {
-    try {
-        const userIds = [auction.event.host];
-        if (auction.bids.length > 0) {
-            const winningBid = auction.bids.reduce((prev, current) =>
-                (prev.amount > current.amount) ? prev : current
-            );
-            userIds.push(winningBid.bidder);
-        }
+// const processAuctionEndEmails = async (auction, eventId, auctionEndTime) => {
+//     try {
+//         const userIds = [auction.event.host];
+//         if (auction.bids.length > 0) {
+//             const winningBid = auction.bids.reduce((prev, current) =>
+//                 (prev.amount > current.amount) ? prev : current
+//             );
+//             userIds.push(winningBid.bidder);
+//         }
 
-        const users = await getUsersInParallel(userIds);
-        const host = users[auction.event.host.toString()];
+//         const users = await getUsersInParallel(userIds);
+//         const host = users[auction.event.host.toString()];
 
-        if (!host?.email) {
-            console.error('Host email not found');
-            return;
-        }
+//         if (!host?.email) {
+//             console.error('Host email not found');
+//             return;
+//         }
 
-        if (auction.bids.length > 0) {
-            const winningBid = auction.bids.reduce((prev, current) =>
-                (prev.amount > current.amount) ? prev : current
-            );
-            const winner = users[winningBid.bidder.toString()];
+//         if (auction.bids.length > 0) {
+//             const winningBid = auction.bids.reduce((prev, current) =>
+//                 (prev.amount > current.amount) ? prev : current
+//             );
+//             const winner = users[winningBid.bidder.toString()];
 
-            if (winner?.email) {
-                const winnerEmailMessage = `
-                    <h2>Congratulations! You've Won the Auction!</h2>
-                    <p>You are the winning bidder for "${auction.itemName}"</p>
-                    <p>Winning Bid: $${winningBid.amount.toLocaleString()}</p>
-                    <p>Auction End Time: ${auctionEndTime.toLocaleString()}</p>
-                    <p>The event host will contact you soon with further details.</p>
-                `;
-                queueEmail(
-                    winner.email,
-                    `Auction Won - ${auction.itemName}`,
-                    winnerEmailMessage,
-                    {
-                        priority: 10,
-                        metadata: {
-                            type: 'auction_winner',
-                            auctionId: auction._id.toString(),
-                            eventId
-                        }
-                    }
-                );
-            }
+//             if (winner?.email) {
+//                 const winnerEmailMessage = `
+//                     <h2>Congratulations! You've Won the Auction!</h2>
+//                     <p>You are the winning bidder for "${auction.itemName}"</p>
+//                     <p>Winning Bid: $${winningBid.amount.toLocaleString()}</p>
+//                     <p>Auction End Time: ${auctionEndTime.toLocaleString()}</p>
+//                     <p>The event host will contact you soon with further details.</p>
+//                 `;
+//                 queueEmail(
+//                     winner.email,
+//                     `Auction Won - ${auction.itemName}`,
+//                     winnerEmailMessage,
+//                     {
+//                         priority: 10,
+//                         metadata: {
+//                             type: 'auction_winner',
+//                             auctionId: auction._id.toString(),
+//                             eventId
+//                         }
+//                     }
+//                 );
+//             }
 
-            const hostEmailMessage = `
-                <h2>Your Auction Has Ended!</h2>
-                <p>The auction for "${auction.itemName}" has ended.</p>
-                <p>Winning Bid: $${winningBid.amount.toLocaleString()}</p>
-                <p>Winner Email: ${winner?.email || 'Email not available'}</p>
-                <p>Please contact the winner to arrange delivery/payment.</p>
-            `;
-            queueEmail(
-                host.email,
-                `Auction Ended - ${auction.itemName}`,
-                hostEmailMessage,
-                {
-                    priority: 10,
-                    metadata: {
-                        type: 'auction_ended_with_winner',
-                        auctionId: auction._id.toString(),
-                        eventId
-                    }
-                }
-            );
-        } else {
-            const noBidsMessage = `
-                <h2>Your Auction Has Ended</h2>
-                <p>The auction for "${auction.itemName}" has ended.</p>
-                <p>Unfortunately, no bids were placed on this item.</p>
-                <p>End Time: ${auctionEndTime.toLocaleString()}</p>
-            `;
-            queueEmail(
-                host.email,
-                `Auction Ended - ${auction.itemName}`,
-                noBidsMessage,
-                {
-                    priority: 5,
-                    metadata: {
-                        type: 'auction_ended_no_bids',
-                        auctionId: auction._id.toString(),
-                        eventId
-                    }
-                }
-            );
-        }
-    } catch (error) {
-        console.error('Error processing auction end emails:', error);
-    }
-};
+//             const hostEmailMessage = `
+//                 <h2>Your Auction Has Ended!</h2>
+//                 <p>The auction for "${auction.itemName}" has ended.</p>
+//                 <p>Winning Bid: $${winningBid.amount.toLocaleString()}</p>
+//                 <p>Winner Email: ${winner?.email || 'Email not available'}</p>
+//                 <p>Please contact the winner to arrange delivery/payment.</p>
+//             `;
+//             queueEmail(
+//                 host.email,
+//                 `Auction Ended - ${auction.itemName}`,
+//                 hostEmailMessage,
+//                 {
+//                     priority: 10,
+//                     metadata: {
+//                         type: 'auction_ended_with_winner',
+//                         auctionId: auction._id.toString(),
+//                         eventId
+//                     }
+//                 }
+//             );
+//         } else {
+//             const noBidsMessage = `
+//                 <h2>Your Auction Has Ended</h2>
+//                 <p>The auction for "${auction.itemName}" has ended.</p>
+//                 <p>Unfortunately, no bids were placed on this item.</p>
+//                 <p>End Time: ${auctionEndTime.toLocaleString()}</p>
+//             `;
+//             queueEmail(
+//                 host.email,
+//                 `Auction Ended - ${auction.itemName}`,
+//                 noBidsMessage,
+//                 {
+//                     priority: 5,
+//                     metadata: {
+//                         type: 'auction_ended_no_bids',
+//                         auctionId: auction._id.toString(),
+//                         eventId
+//                     }
+//                 }
+//             );
+//         }
+//     } catch (error) {
+//         console.error('Error processing auction end emails:', error);
+//     }
+// };
 
 const processBidEmails = async (auction, bidderId, amount, now, auctionEndTime) => {
     try {
